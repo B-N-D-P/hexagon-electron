@@ -1,0 +1,145 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    ADXL345 TO ARDUINO MEGA - QUICK WIRING
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT YOU NEED:
+✓ Arduino Mega 2560
+✓ 5× ADXL345 accelerometer breakout boards
+✓ Large breadboard (or 2 smaller ones)
+✓ Jumper wires (male-to-male)
+✓ USB cable
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 1: POWER RAILS (on breadboard)
+═══════════════════════════════════════════════════════════════════════════════
+
+[ ] Connect Arduino 5V → Breadboard positive rail (red wire)
+    (Use 3.3V if your ADXL345 boards specifically require it)
+
+[ ] Connect Arduino GND → Breadboard negative rail (black wire)
+
+[ ] Connect ALL 5 sensors' VCC pins → Positive rail (red)
+
+[ ] Connect ALL 5 sensors' GND pins → Negative rail (black)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 2: SPI SHARED PINS (MOSI, MISO, SCK) - Goes to ALL 5 sensors
+═══════════════════════════════════════════════════════════════════════════════
+
+[ ] Arduino pin 51 (MOSI) → Connect to ALL 5 sensor MOSI pins
+    (Use jumpers to create a shared line on breadboard)
+
+[ ] Arduino pin 50 (MISO) → Connect to ALL 5 sensor MISO pins
+    (Use jumpers to create a shared line on breadboard)
+
+[ ] Arduino pin 52 (SCK) → Connect to ALL 5 sensor SCK pins
+    (Use jumpers to create a shared line on breadboard)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 3: CHIP SELECT (CS) - Each sensor gets its OWN pin
+═══════════════════════════════════════════════════════════════════════════════
+
+[ ] Arduino pin 53 → Sensor 0 CS pin
+
+[ ] Arduino pin 10 → Sensor 1 CS pin
+
+[ ] Arduino pin 9 → Sensor 2 CS pin
+
+[ ] Arduino pin 8 → Sensor 3 CS pin
+
+[ ] Arduino pin 7 → Sensor 4 CS pin
+
+═══════════════════════════════════════════════════════════════════════════════
+EACH ADXL345 SENSOR CONNECTIONS (Repeat for all 5 sensors)
+═══════════════════════════════════════════════════════════════════════════════
+
+Sensor Pinout:
+  VCC   → Breadboard positive rail (+)
+  GND   → Breadboard negative rail (-)
+  MOSI  → Arduino 51 (shared with other sensors)
+  MISO  → Arduino 50 (shared with other sensors)
+  SCK   → Arduino 52 (shared with other sensors)
+  CS    → Arduino 53, 10, 9, 8, or 7 (DIFFERENT for each sensor)
+  INT1  → Not used (leave unconnected)
+  INT2  → Not used (leave unconnected)
+
+═══════════════════════════════════════════════════════════════════════════════
+OPTIONAL BUT RECOMMENDED: Add Decoupling Capacitors
+═══════════════════════════════════════════════════════════════════════════════
+
+For better stability, add one 10µF capacitor per sensor:
+[ ] Capacitor 1 across Sensor 0 VCC-GND
+[ ] Capacitor 2 across Sensor 1 VCC-GND
+[ ] Capacitor 3 across Sensor 2 VCC-GND
+[ ] Capacitor 4 across Sensor 3 VCC-GND
+[ ] Capacitor 5 across Sensor 4 VCC-GND
+
+═══════════════════════════════════════════════════════════════════════════════
+BEFORE YOU UPLOAD THE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+The Arduino code has been ALREADY UPDATED with correct CS pins:
+  CS_PINS = {53, 10, 9, 8, 7}
+
+Just upload the sketch from: ADXLARDUINO/DATA_COLLECTION_NO_TIMESTAMP/
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER WIRING IS COMPLETE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Connect Arduino Mega to computer via USB
+
+2. Open Arduino IDE:
+   - File → Open → ADXLARDUINO/DATA_COLLECTION_NO_TIMESTAMP/DATA_COLLECTION_NO_TIMESTAMP.ino
+   - Tools → Board → Arduino Mega 2560
+   - Tools → Port → /dev/ttyUSB0 (or your port)
+   - Upload (Ctrl+U)
+
+3. Check Serial Monitor (115200 baud):
+   - Should see: "# Initializing ADXL345 sensors..."
+   - Should see: "# Sensor 0 initialized OK"
+   - Should see: "# Sensor 1 initialized OK"
+   - ... (all 5 sensors)
+
+4. If successful, start data collection:
+   cd ADXLARDUINO
+   ./collect_30sec_batch.sh /dev/ttyUSB0 1
+
+═══════════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: "ERROR: Failed to initialize sensor X"
+→ Check that sensor's CS pin connection
+→ Verify power is connected to that sensor
+→ Try a different Arduino pin for that sensor's CS
+
+Problem: Serial port says "Device or resource busy"
+→ Close Arduino IDE
+→ Disconnect USB cable
+→ Wait 5 seconds
+→ Reconnect USB cable
+→ Try again
+
+Problem: No serial data appearing
+→ Check USB cable is connected
+→ Select correct COM port in Arduino IDE
+→ Press reset button on Arduino
+
+Problem: Getting zeros or garbage data
+→ Verify all GND connections are solid
+→ Check CS pin wires aren't loose
+→ Try adding decoupling capacitors
+
+═══════════════════════════════════════════════════════════════════════════════
+
+QUICK PIN REFERENCE:
+┌─────────────────────────────────────────────────────────────┐
+│ ARDUINO MEGA PINS USED:                                     │
+│                                                              │
+│ SPI Shared (all sensors):  50 (MISO), 51 (MOSI), 52 (SCK)  │
+│ CS Pins (one each):        53, 10, 9, 8, 7                 │
+│ Power:                     5V, GND                           │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════

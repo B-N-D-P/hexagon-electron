@@ -1,0 +1,249 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    ARDUINO MEGA TO ADXL345 PIN DIAGRAM
+═══════════════════════════════════════════════════════════════════════════════
+
+                          ARDUINO MEGA 2560
+                          ═════════════════
+
+Front View (USB port on left):
+
+    ┌─────────────────────────────────────────────────────────┐
+    │  POWER PINS (LEFT SIDE)                                 │
+    │  ┌──────────────────────────────────────────────────┐  │
+    │  │ GND                                              │  │
+    │  │ GND                                              │  │
+    │  │ AREF                                             │  │
+    │  │ 5V  ◄──── CONNECT TO BREADBOARD + RAIL           │  │
+    │  │ 3.3V                                             │  │
+    │  │ ...                                              │  │
+    │  └──────────────────────────────────────────────────┘  │
+    │                                                          │
+    │  MAIN PINS (RIGHT SIDE)                                │
+    │  ┌──────────────────────────────────────────────────┐  │
+    │  │ ...                                              │  │
+    │  │ Pin 7  ◄──── Sensor 4 CS                         │  │
+    │  │ Pin 8  ◄──── Sensor 3 CS                         │  │
+    │  │ Pin 9  ◄──── Sensor 2 CS                         │  │
+    │  │ Pin 10 ◄──── Sensor 1 CS                         │  │
+    │  │ ...                                              │  │
+    │  │ Pin 50 ◄──── MISO (all sensors)                  │  │
+    │  │ Pin 51 ◄──── MOSI (all sensors)                  │  │
+    │  │ Pin 52 ◄──── SCK (all sensors)                   │  │
+    │  │ Pin 53 ◄──── Sensor 0 CS                         │  │
+    │  └──────────────────────────────────────────────────┘  │
+    │                                                          │
+    │ GND (bottom right) ◄──── CONNECT TO BREADBOARD - RAIL   │
+    └─────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            BREADBOARD
+                            ══════════
+
+Top View:
+
+     A    B    C    D    E    F    G    H    I    J  (columns)
+   ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+ + │ +5V│ +  │ +  │ +  │ +  │ +  │ +  │ +  │ +  │ +  │ ◄ Power (+)
+   ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤      from Arduino 5V
+ - │GND │ -  │ -  │ -  │ -  │ -  │ -  │ -  │ -  │ -  │ ◄ Ground (-)
+   ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤      from Arduino GND
+ 1 │    │    │    │    │    │    │    │    │    │    │
+ 2 │    │MOSI│MISO│ SCK│ CS0│ CS1│ CS2│ CS3│ CS4│    │
+ 3 │    │ ◄  │ ◄  │ ◄  │ ◄  │ ◄  │ ◄  │ ◄  │ ◄  │    │
+ 4 │    │ |  │ |  │ |  │ |  │ |  │ |  │ |  │ |  │    │
+ 5 │    │ |  │ |  │ |  │ |  │ |  │ |  │ |  │ |  │    │
+   ├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+     │    │    │    │    │    │    │    │    │    │
+     ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼
+   From From From From From From From From From From
+   Ard  51   50   52   53   10    9    8    7   (none)
+   5V  MOSI MISO SCK   CS0  CS1  CS2  CS3  CS4
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                      ADXL345 SENSOR CONNECTION
+                      ═════════════════════════
+
+Each ADXL345 sensor (5 total) connects to breadboard like this:
+
+     ADXL345 Sensor Pin          Connects To              Example Location
+     ─────────────────────────────────────────────────────────────────────
+     VCC (Power)          →      Breadboard + rail        Any + hole
+     GND (Ground)         →      Breadboard - rail        Any - hole
+     MOSI                 →      Column B (shared)        B1, B2, B3, etc.
+     MISO                 →      Column C (shared)        C1, C2, C3, etc.
+     SCK                  →      Column D (shared)        D1, D2, D3, etc.
+     CS (Chip Select)     →      Different column (unique)
+     INT1, INT2           →      Leave disconnected       (not used)
+
+
+Detailed breakdown for each sensor:
+
+┌──────────────────────────────────────────────────────────────────┐
+│ SENSOR 0                                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ VCC  → + rail                                                    │
+│ GND  → - rail                                                    │
+│ MOSI → B (row 2)  ◄ shared with other sensors                   │
+│ MISO → C (row 2)  ◄ shared with other sensors                   │
+│ SCK  → D (row 2)  ◄ shared with other sensors                   │
+│ CS   → E (row 2)  ◄ connected to Arduino pin 53 ← unique        │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ SENSOR 1                                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ VCC  → + rail                                                    │
+│ GND  → - rail                                                    │
+│ MOSI → B (row 3)  ◄ shared with other sensors                   │
+│ MISO → C (row 3)  ◄ shared with other sensors                   │
+│ SCK  → D (row 3)  ◄ shared with other sensors                   │
+│ CS   → F (row 2)  ◄ connected to Arduino pin 10 ← unique        │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ SENSOR 2                                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ VCC  → + rail                                                    │
+│ GND  → - rail                                                    │
+│ MOSI → B (row 4)  ◄ shared with other sensors                   │
+│ MISO → C (row 4)  ◄ shared with other sensors                   │
+│ SCK  → D (row 4)  ◄ shared with other sensors                   │
+│ CS   → G (row 2)  ◄ connected to Arduino pin 9 ← unique         │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ SENSOR 3                                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ VCC  → + rail                                                    │
+│ GND  → - rail                                                    │
+│ MOSI → B (row 5)  ◄ shared with other sensors                   │
+│ MISO → C (row 5)  ◄ shared with other sensors                   │
+│ SCK  → D (row 5)  ◄ shared with other sensors                   │
+│ CS   → H (row 2)  ◄ connected to Arduino pin 8 ← unique         │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ SENSOR 4                                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ VCC  → + rail                                                    │
+│ GND  → - rail                                                    │
+│ MOSI → B (row 6)  ◄ shared with other sensors                   │
+│ MISO → C (row 6)  ◄ shared with other sensors                   │
+│ SCK  → D (row 6)  ◄ shared with other sensors                   │
+│ CS   → I (row 2)  ◄ connected to Arduino pin 7 ← unique         │
+└──────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                         ACTUAL WIRE CONNECTIONS
+                         ═════════════════════════
+
+From Arduino to Breadboard:
+
+1. Red wire:   Arduino 5V       → Breadboard + rail (column A, + row)
+2. Black wire: Arduino GND      → Breadboard - rail (column A, - row)
+3. Wire 3:     Arduino pin 51   → Breadboard column B (any row 1-30)
+4. Wire 4:     Arduino pin 50   → Breadboard column C (any row 1-30)
+5. Wire 5:     Arduino pin 52   → Breadboard column D (any row 1-30)
+6. Wire 6:     Arduino pin 53   → Breadboard column E (preferably row 2)
+7. Wire 7:     Arduino pin 10   → Breadboard column F (preferably row 2)
+8. Wire 8:     Arduino pin 9    → Breadboard column G (preferably row 2)
+9. Wire 9:     Arduino pin 8    → Breadboard column H (preferably row 2)
+10. Wire 10:   Arduino pin 7    → Breadboard column I (preferably row 2)
+
+
+From Each Sensor (5 × 6 = 30 wires total):
+
+Sensor 0:
+  → VCC pin    to + rail        (any hole in + row)
+  → GND pin    to - rail        (any hole in - row)
+  → MOSI pin   to column B      (any hole in column B)
+  → MISO pin   to column C      (any hole in column C)
+  → SCK pin    to column D      (any hole in column D)
+  → CS pin     to column E      (any hole in column E)
+
+Sensor 1:
+  → VCC pin    to + rail        
+  → GND pin    to - rail        
+  → MOSI pin   to column B      
+  → MISO pin   to column C      
+  → SCK pin    to column D      
+  → CS pin     to column F      
+
+Sensor 2:
+  → VCC pin    to + rail        
+  → GND pin    to - rail        
+  → MOSI pin   to column B      
+  → MISO pin   to column C      
+  → SCK pin    to column D      
+  → CS pin     to column G      
+
+Sensor 3:
+  → VCC pin    to + rail        
+  → GND pin    to - rail        
+  → MOSI pin   to column B      
+  → MISO pin   to column C      
+  → SCK pin    to column D      
+  → CS pin     to column H      
+
+Sensor 4:
+  → VCC pin    to + rail        
+  → GND pin    to - rail        
+  → MOSI pin   to column B      
+  → MISO pin   to column C      
+  → SCK pin    to column D      
+  → CS pin     to column I      
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                           SIGNAL FLOW DIAGRAM
+                           ═══════════════════
+
+Arduino              Breadboard              ADXL345 Sensors
+─────────            ──────────              ─────────────────
+                     
+                     + rail ──────────────→  VCC (all 5)
+5V ──────────────→   |
+                     - rail ──────────────→  GND (all 5)
+GND ──────────→      |
+
+Pin 51 (MOSI) ──────→ Col B ───────────────→ MOSI (all 5)
+Pin 50 (MISO) ──────→ Col C ◄───────────────  MISO (all 5)
+Pin 52 (SCK) ──────→ Col D ───────────────→ SCK (all 5)
+
+Pin 53 ───────────→ Col E ───────────────→ Sensor 0 CS
+Pin 10 ───────────→ Col F ───────────────→ Sensor 1 CS
+Pin 9 ────────────→ Col G ───────────────→ Sensor 2 CS
+Pin 8 ────────────→ Col H ───────────────→ Sensor 3 CS
+Pin 7 ────────────→ Col I ───────────────→ Sensor 4 CS
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            SUMMARY TABLE
+                            ══════════════
+
+What connects to what:
+
+Arduino Pin    →    Breadboard    →    Connect To
+─────────────────────────────────────────────────────────────
+5V             →    + rail       →    All sensor VCC pins
+GND            →    - rail       →    All sensor GND pins
+51 (MOSI)      →    Column B     →    All sensor MOSI pins
+50 (MISO)      →    Column C     →    All sensor MISO pins
+52 (SCK)       →    Column D     →    All sensor SCK pins
+53             →    Column E     →    Sensor 0 only
+10             →    Column F     →    Sensor 1 only
+9              →    Column G     →    Sensor 2 only
+8              →    Column H     →    Sensor 3 only
+7              →    Column I     →    Sensor 4 only
+
+═══════════════════════════════════════════════════════════════════════════════
+
+REMEMBER: 
+✓ Shared lines (MOSI, MISO, SCK) go to ALL sensors
+✗ Chip Select (CS) goes to DIFFERENT Arduino pins for each sensor
+✓ Power and Ground connect to all sensors
+
+═══════════════════════════════════════════════════════════════════════════════

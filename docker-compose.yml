@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: struct-repair-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./structural_repair.db
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app
+      - ./python123:/app/python123
+      - ./backend/uploads:/app/uploads
+      - ./backend/outputs:/app/outputs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - struct-repair-network
+    restart: unless-stopped
+
+  # Frontend Web UI
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: struct-repair-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - struct-repair-network
+    restart: unless-stopped
+
+  # Optional: PostgreSQL database (for future scaling)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: struct-repair-db
+  #   environment:
+  #     - POSTGRES_DB=structural_repair
+  #     - POSTGRES_USER=repair_user
+  #     - POSTGRES_PASSWORD=secure_password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - struct-repair-network
+
+networks:
+  struct-repair-network:
+    driver: bridge
+
+volumes:
+  # postgres_data:
+  #   driver: local

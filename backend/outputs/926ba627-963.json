@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "analysis_date": "2026-01-09T08:05:03",
+    "program_version": "1.0",
+    "structure_id": "926ba627-963",
+    "sampling_rate_hz": 1000.0,
+    "recording_duration_sec": null
+  },
+  "modal_parameters": {
+    "original_state": {
+      "natural_frequencies_hz": [
+        20.01953125
+      ],
+      "mode_shapes": [
+        [
+          0.9774354161436379,
+          0.989008724319265,
+          1.0,
+          0.996928652428129,
+          0.9950225469478404
+        ]
+      ],
+      "damping_ratios": [
+        0.02
+      ]
+    },
+    "damaged_state": {
+      "natural_frequencies_hz": [
+        20.01953125,
+        109.9853515625
+      ],
+      "mode_shapes": [
+        [
+          0.9859435663157373,
+          0.985616856595845,
+          0.9899377257444903,
+          1.0,
+          0.9950469180412226
+        ],
+        [
+          0.9753201300003439,
+          1.0,
+          0.9925212155883733,
+          0.959824187307547,
+          0.9538688182732286
+        ]
+      ],
+      "damping_ratios": [
+        0.02,
+        0.02
+      ]
+    },
+    "repaired_state": {
+      "natural_frequencies_hz": [
+        20.01953125,
+        109.9853515625
+      ],
+      "mode_shapes": [
+        [
+          0.9946282072914746,
+          0.9929445679836676,
+          0.9964597116527066,
+          0.9955016220171424,
+          1.0
+        ],
+        [
+          0.9911705225544523,
+          0.9979390104111141,
+          1.0,
+          0.9877694135173255,
+          0.9775268231255703
+        ]
+      ],
+      "damping_ratios": [
+        0.02,
+        0.02
+      ]
+    }
+  },
+  "quality_assessment": {
+    "overall_score": 0.49998406594429085,
+    "breakdown": {
+      "frequency_recovery": 0.0,
+      "mode_shape_match": 0.9999468864809694,
+      "damping_recovery": 1.0
+    },
+    "per_mode_analysis": [
+      {
+        "mode": 1,
+        "frequency_recovery": 0.0,
+        "mac_value": 0.9999468864809694,
+        "damping_recovery": 1.0
+      }
+    ],
+    "interpretation": "Poor - Minimal Improvement",
+    "interpretation_code": "POOR",
+    "confidence_level": "low"
+  },
+  "statistics": {
+    "frequency_changes": {
+      "original_to_damaged_percent": [
+        0.0
+      ],
+      "damaged_to_repaired_percent": [
+        0.0
+      ],
+      "recovery_percent": [
+        0.0
+      ]
+    },
+    "average_stiffness_loss_percent": 0.0,
+    "average_stiffness_recovery_percent": 0.0
+  },
+  "mode_mapping": {
+    "damaged_to_original": null,
+    "repaired_to_original": null
+  },
+  "mac_matrices": {
+    "original_vs_damaged": [
+      [
+        0.999960568537539,
+        0.9995683461872493
+      ]
+    ],
+    "original_vs_repaired": [
+      [
+        0.9999468864791696,
+        0.9998666545875095
+      ]
+    ]
+  },
+  "recommendations": [
+    "Further repair recommended",
+    "Schedule follow-up inspection in 6 months",
+    "Document repair in maintenance records",
+    "Monitor vibration behavior periodically"
+  ]
+}

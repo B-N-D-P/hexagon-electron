@@ -1,0 +1,118 @@
+{
+  "metadata": {
+    "analysis_date": "2026-01-11T22:24:28",
+    "program_version": "1.0",
+    "structure_id": "696a66b7-90a",
+    "sampling_rate_hz": 1000.0,
+    "recording_duration_sec": null
+  },
+  "modal_parameters": {
+    "original_state": {
+      "natural_frequencies_hz": [
+        20.01953125
+      ],
+      "mode_shapes": [
+        [
+          0.9955238104295382,
+          0.9788781479476474,
+          1.0,
+          0.9966972593507164,
+          0.9914622448199047
+        ]
+      ],
+      "damping_ratios": [
+        0.02
+      ]
+    },
+    "damaged_state": {
+      "natural_frequencies_hz": [
+        79.9560546875
+      ],
+      "mode_shapes": [
+        [
+          0.9764619955641503,
+          1.0,
+          0.9915119030190039,
+          0.9619693935864858,
+          0.9528152525737015
+        ]
+      ],
+      "damping_ratios": [
+        0.02
+      ]
+    },
+    "repaired_state": {
+      "natural_frequencies_hz": [
+        20.01953125
+      ],
+      "mode_shapes": [
+        [
+          0.9955238104295382,
+          0.9788781479476474,
+          1.0,
+          0.9966972593507164,
+          0.9914622448199047
+        ]
+      ],
+      "damping_ratios": [
+        0.02
+      ]
+    }
+  },
+  "quality_assessment": {
+    "overall_score": 1.0,
+    "breakdown": {
+      "frequency_recovery": 1.0,
+      "mode_shape_match": 1.0,
+      "damping_recovery": 1.0
+    },
+    "per_mode_analysis": [
+      {
+        "mode": 1,
+        "frequency_recovery": 1.0,
+        "mac_value": 1.0,
+        "damping_recovery": 1.0
+      }
+    ],
+    "interpretation": "Excellent - Nearly Perfect Repair",
+    "interpretation_code": "EXCELLENT",
+    "confidence_level": "low"
+  },
+  "statistics": {
+    "frequency_changes": {
+      "original_to_damaged_percent": [
+        299.4
+      ],
+      "damaged_to_repaired_percent": [
+        -75.0
+      ],
+      "recovery_percent": [
+        100.0
+      ]
+    },
+    "average_stiffness_loss_percent": 299.39024390243907,
+    "average_stiffness_recovery_percent": 100.0
+  },
+  "mode_mapping": {
+    "damaged_to_original": null,
+    "repaired_to_original": null
+  },
+  "mac_matrices": {
+    "original_vs_damaged": [
+      [
+        0.9995197000366632
+      ]
+    ],
+    "original_vs_repaired": [
+      [
+        0.9999999999981972
+      ]
+    ]
+  },
+  "recommendations": [
+    "Structure suitable for normal operating loads",
+    "Schedule follow-up inspection in 6 months",
+    "Document repair in maintenance records",
+    "Monitor vibration behavior periodically"
+  ]
+}

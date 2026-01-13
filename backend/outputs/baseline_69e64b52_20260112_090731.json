@@ -1,0 +1,21 @@
+{
+  "profile_id": "69e64b52",
+  "name": "TestBaseline_Healthy",
+  "created_at": "2026-01-12T03:22:31.810386Z",
+  "fs": 1000.0,
+  "num_sensors": 5,
+  "peaks": [],
+  "rms_baseline": {
+    "0": 0.10109580287857399,
+    "1": 0.12092106010753265,
+    "2": 0.11096324577535169,
+    "3": 0.09111539096900494,
+    "4": 0.1307284604028083
+  },
+  "psd_profile": {},
+  "frequencies": null,
+  "damping_ratios": null,
+  "mode_shapes": null,
+  "source_file": null,
+  "description": "Created from live monitoring"
+}

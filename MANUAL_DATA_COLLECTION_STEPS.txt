@@ -1,0 +1,154 @@
+MANUAL DATA COLLECTION - STEP BY STEP
+(NO AUTOMATION - JUST YOU & DATA)
+
+YOUR GOAL: Collect 72 hours (or test with 1 hour) of sensor data from Arduino
+
+
+STEP 1: UPLOAD ARDUINO SKETCH TO ARDUINO MEGA
+================================================
+
+COMMAND:
+  arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega arduino/DATA_COLLECTION.ino
+
+WHAT IT DOES:
+  - Uploads DATA_COLLECTION.ino to your Arduino Mega
+  - Configures the 5 ADXL345 sensors on SPI
+  - Sets sampling to 1000 Hz
+  - Ready to stream data
+
+EXPECTED OUTPUT:
+  "Sketch uses XXXXX bytes of program storage space"
+  No errors
+
+NOTES:
+  - Change /dev/ttyACM0 if your port is different
+  - To find your port: ls /dev/ttyACM* /dev/ttyUSB*
+
+
+STEP 2: VERIFY ARDUINO DATA IS FLOWING
+=======================================
+
+COMMAND:
+  cat /dev/ttyACM0
+
+WHAT IT DOES:
+  - Shows live sensor data from Arduino
+
+EXPECTED OUTPUT (first 15 seconds):
+  # Initializing ADXL345 sensors...
+  # Sensor 0 initialized OK
+  # Sensor 1 initialized OK
+  # Sensor 2 initialized OK
+  # Sensor 3 initialized OK
+  # Sensor 4 initialized OK
+  # timestamp_ms,s1_x,s1_y,s1_z,s2_x,s2_y,s2_z,s3_x,s3_y,s3_z,s4_x,s4_y,s4_z,s5_x,s5_y,s5_z
+  1000,125,-45,9850,128,-42,9847,122,-48,9852,126,-40,9849,124,-46,9851
+  2000,126,-44,9851,127,-41,9848,123,-47,9851,127,-39,9850,125,-45,9852
+  3000,125,-45,9850,128,-42,9847,122,-48,9852,126,-40,9849,124,-46,9851
+
+If you see this -> DATA IS FLOWING! Press Ctrl+C to stop
+
+
+STEP 3: CREATE OUTPUT DIRECTORY
+================================
+
+COMMAND:
+  mkdir -p data/baseline
+
+WHAT IT DOES:
+  - Creates folder for baseline data
+
+
+STEP 4: COLLECT DATA (CHOOSE ONE)
+==================================
+
+CHOOSE YOUR COLLECTION DURATION:
+
+OPTION A: QUICK TEST (1 hour)
+=============================
+
+COMMAND:
+  timeout 3600 cat /dev/ttyACM0 > data/baseline/baseline_1hour.csv
+
+TIME: ~1 hour
+FILE SIZE: ~300 MB
+SAMPLES: ~3.6 million
+
+BEST FOR: Testing your setup, quick validation
+
+
+OPTION B: FULL BASELINE (72 hours) [RECOMMENDED]
+=================================================
+
+COMMAND:
+  timeout 259200 cat /dev/ttyACM0 > data/baseline/baseline_72hours.csv
+
+TIME: 72 hours (3 days)
+FILE SIZE: ~21 GB
+SAMPLES: ~259 million
+
+BEST FOR: Production training (what you want!)
+
+TO RUN IN BACKGROUND (so terminal can close):
+  nohup timeout 259200 cat /dev/ttyACM0 > data/baseline/baseline_72hours.csv &
+
+TO RUN IN SCREEN (survives network drops):
+  screen -S arduino_collect
+  timeout 259200 cat /dev/ttyACM0 > data/baseline/baseline_72hours.csv
+  [Press Ctrl+A, then D to detach]
+  [Later: screen -r arduino_collect to reattach]
+
+
+STEP 5: WHILE COLLECTION IS RUNNING
+====================================
+
+You can do this while collection is happening:
+
+Monitor collection progress (in another terminal):
+  tail -f data/baseline/baseline_72hours.csv
+
+Check file size growing:
+  watch -n 10 'ls -lh data/baseline/baseline_72hours.csv'
+
+Check line count:
+  wc -l data/baseline/baseline_72hours.csv
+
+
+STEP 6: VERIFY DATA AFTER COLLECTION
+=====================================
+
+COMMAND 1: Check file size
+  ls -lh data/baseline/baseline_72hours.csv
+  
+EXPECTED: ~21 GB
+
+COMMAND 2: Count total lines
+  wc -l data/baseline/baseline_72hours.csv
+  
+EXPECTED: ~259,200,000 lines
+
+COMMAND 3: View first 10 lines
+  head -10 data/baseline/baseline_72hours.csv
+  
+COMMAND 4: View last 10 lines
+  tail -10 data/baseline/baseline_72hours.csv
+  
+COMMAND 5: Check for errors
+  grep "None\|NaN\|ERROR" data/baseline/baseline_72hours.csv | wc -l
+  
+EXPECTED: 0
+
+
+QUICK START SUMMARY
+===================
+
+1 Hour (Quick Test):
+  timeout 3600 cat /dev/ttyACM0 > data/baseline/baseline_1hour.csv
+
+72 Hours (Full Production):
+  timeout 259200 cat /dev/ttyACM0 > data/baseline/baseline_72hours.csv
+
+After collection:
+  1. Verify file size and line count
+  2. Tell me the file path
+  3. We'll do MANUAL model training together!

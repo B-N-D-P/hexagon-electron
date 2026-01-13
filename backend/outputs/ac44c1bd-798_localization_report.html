@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Damage Localization Report</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f5f5f5; }
+    .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h2 { color: #333; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }
+    h3 { color: #0066cc; margin-top: 20px; }
+    .status-indicator { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+<div class="damage-localization-section">
+  <h2>🔍 Damage Localization Analysis</h2>
+  <p class="section-description">
+    Comprehensive damage detection using 3 independent analysis methods:
+    Spatial Mapping, MAC Matrix Analysis, and Wavelet Detection
+  </p>
+</div>
+
+
+<div class="status-indicator" style="background-color: #33CC33; padding: 15px; border-radius: 8px; margin: 10px 0;">
+  <h3 style="margin: 0; color: white;">🟢 LOW</h3>
+  <p style="margin: 5px 0; color: white;">Severity: 5.1%</p>
+  <p style="margin: 5px 0; color: white;">Confidence: 51.2%</p>
+</div>
+
+
+<div class="summary-cards" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin: 20px 0;">
+  
+  <div class="card" style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+    <h4 style="margin: 0; font-size: 14px;">Damage Type</h4>
+    <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">
+      Unknown Damage
+    </p>
+  </div>
+  
+  <div class="card" style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+    <h4 style="margin: 0; font-size: 14px;">Primary Location</h4>
+    <p style="margin: 5px 0; font-weight: bold; font-size: 14px;">
+      Column 1 - Bottom-Left
+    </p>
+  </div>
+  
+  <div class="card" style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+    <h4 style="margin: 0; font-size: 14px;">Method Agreement</h4>
+    <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">
+      33%
+    </p>
+  </div>
+  
+  <div class="card" style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+    <h4 style="margin: 0; font-size: 14px;">Avg Method Severity</h4>
+    <p style="margin: 5px 0; font-weight: bold; font-size: 16px;">
+      5.2%
+    </p>
+  </div>
+  
+</div>
+
+
+<div class="heat-map-section" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <h3>2D Damage Heat Map</h3>
+  <svg width="600" height="300" xmlns="http://www.w3.org/2000/svg"><style>.sensor-circle { filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }</style><rect width="600" height="300" fill="#ffffff" stroke="#cccccc" stroke-width="2"/><text x="300.0" y="25" font-size="18" font-weight="bold" text-anchor="middle">2D Damage Heat Map</text><text x="20" y="40" font-size="12" fill="#666">Sensor Position</text><text x="20" y="280" font-size="12" fill="#666">Distance Along Structure</text><circle cx="100" cy="220" r="30" fill="#33CC33" opacity="0.7" class="sensor-circle"/><text x="100" y="225" font-size="14" font-weight="bold" text-anchor="middle" fill="white">S1</text><text x="100" y="265" font-size="10" text-anchor="middle" fill="#333">0%</text><circle cx="250" cy="220" r="31.500301974341625" fill="#33CC33" opacity="0.7" class="sensor-circle"/><text x="250" y="225" font-size="14" font-weight="bold" text-anchor="middle" fill="white">S2</text><text x="250" y="265" font-size="10" text-anchor="middle" fill="#333">15%</text><circle cx="400" cy="220" r="31.500301974341625" fill="#33CC33" opacity="0.7" class="sensor-circle"/><text x="400" y="225" font-size="14" font-weight="bold" text-anchor="middle" fill="white">S3</text><text x="400" y="265" font-size="10" text-anchor="middle" fill="#333">15%</text><circle cx="550" cy="220" r="31.500301974341625" fill="#33CC33" opacity="0.7" class="sensor-circle"/><text x="550" y="225" font-size="14" font-weight="bold" text-anchor="middle" fill="white">S4</text><text x="550" y="265" font-size="10" text-anchor="middle" fill="#333">15%</text><text x="20" y="290" font-size="10" fill="#666">Green: Healthy | Yellow: Minor | Orange: Moderate | Red: Critical</text></svg>
+  <p style="font-size: 12px; color: #666; margin-top: 10px;">
+    Circle size and color intensity represent damage severity at each sensor location.
+    Sensor positions based on structure layout.
+  </p>
+</div>
+
+
+<div class="structure-3d-section" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <h3>3D Structure Visualization</h3>
+  <canvas id="structure-canvas-3d" width="600" height="400" style="border: 1px solid #ccc;"></canvas>
+  <script>
+    // Placeholder for 3D rendering using Three.js or similar
+    const canvas = document.getElementById('structure-canvas-3d');
+    const ctx = canvas.getContext('2d');
+    
+    // Draw simple 2D projection of 3D structure
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#333';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('3D Structure: 4 Columns, 12 Beams, 3 Stories', canvas.width/2, canvas.height/2);
+    ctx.fillText('(Interactive 3D requires Three.js library)', canvas.width/2, canvas.height/2 + 30);
+    
+    // Draw simple grid representing structure
+    const cols = 50;
+    const rows = 30;
+    for(let i = 0; i < 4; i++) {
+      ctx.fillStyle = '#999';
+      ctx.fillRect(100 + i*120, 50, 20, 300);
+      ctx.fillStyle = '#666';
+      ctx.font = '10px Arial';
+      ctx.fillText('C'+(i+1), 110 + i*120, 360);
+    }
+    
+    // Draw beams
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 3;
+    for(let story = 0; story < 3; story++) {
+      const y = 100 + story * 100;
+      ctx.beginPath();
+      ctx.moveTo(100, y);
+      ctx.lineTo(460, y);
+      ctx.stroke();
+    }
+  </script>
+  <p style="font-size: 12px; color: #666; margin-top: 10px;">
+    Simplified 3D representation. Gray boxes: Columns, Lines: Beams
+  </p>
+</div>
+
+
+<div class="component-table-section" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <h3>Component Damage Status</h3>
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+    <thead>
+      <tr style="background-color: #f0f0f0;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Component</th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Status</th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Severity</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Story 0, Beam 1-2</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Story 0, Beam 3-4</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Story 0, Beam 1-3</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Story 0, Beam 2-4</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Story 1, Beam 1-2</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ffcccc;">
+    <td style="padding: 8px;">Column 1</td>
+    <td style="padding: 8px;">🔴 DAMAGED</td>
+    <td style="padding: 8px;">5.1%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Column 2</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Column 3</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+  <tr style="background-color: #ccffcc;">
+    <td style="padding: 8px;">Column 4</td>
+    <td style="padding: 8px;">🟢 OK</td>
+    <td style="padding: 8px;">0.0%</td>
+  </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+<div class="method-comparison-section" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <h3>Analysis Methods Comparison</h3>
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+    <thead>
+      <tr style="background-color: #f0f0f0;">
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Method</th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Severity</th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Confidence</th>
+        <th style="padding: 10px; text-align: left; border: 1px solid #ccc;">Damaged Sensors</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ccc;">Spatial Mapping</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">15.0%</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">0.72</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">[1, 2, 3, 4, 5]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ccc;">MAC Matrix</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">0.5%</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">0.24</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">[]</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ccc;">Wavelet</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">0.0%</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">0.24</td>
+        <td style="padding: 8px; border: 1px solid #ccc;">[]</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size: 12px; color: #666; margin-top: 10px;">
+    <strong>Method Agreement:</strong> High agreement across methods increases confidence in diagnosis.
+  </p>
+</div>
+
+
+<div class="recommendations-section" style="background: #fff9f0; padding: 20px; border-radius: 8px; border-left: 4px solid #ff9933; margin: 20px 0;">
+  <h3>🔧 Repair Recommendations (LOW)</h3>
+  
+  <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0;">
+    <p><strong>Primary Action:</strong> Investigate unknown_damage</p>
+  </div>
+  
+  <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0;">
+    <p><strong>Detailed Recommendations:</strong></p>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+      <li>🟢 LOW PRIORITY: Monitor Column 1 - Bottom-Left</li><li>Continue regular monitoring</li><li>Action: Detailed inspection for unknown_damage</li><li>Confidence: 🟠 LOW (51%) - Limited method agreement</li>
+    </ul>
+  </div>
+  
+  <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0;">
+    <p><strong>Confidence Level:</strong> <span style="font-weight: bold; color: #0066cc;">LOW</span></p>
+  </div>
+</div>
+
+  </div>
+</body>
+</html>

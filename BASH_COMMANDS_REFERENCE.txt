@@ -1,0 +1,308 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    BASH COMMANDS - QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+✨ RECOMMENDED: ONE-COMMAND FULL AUTOMATION
+───────────────────────────────────────────────────────────────────────────────
+
+chmod +x scripts/*.sh
+./scripts/full_automation.sh
+
+# This does EVERYTHING:
+# 1. Installs dependencies
+# 2. Starts backend + frontend
+# 3. Collects 3-day baseline (or 1h test)
+# 4. Trains ML models
+# 5. Validates everything
+# 6. Shows dashboard URL
+
+
+🎯 STEP-BY-STEP COMMANDS (If you want control)
+───────────────────────────────────────────────────────────────────────────────
+
+# Make scripts executable (one time only)
+chmod +x scripts/*.sh
+
+# Start all services in separate terminals
+./scripts/start_all.sh
+
+# In another terminal: Collect baseline (test mode: 1 hour)
+./scripts/collect_baseline.sh 1h
+
+# Or collect real baseline (3 days)
+./scripts/collect_baseline.sh 3d
+
+# Train models on the baseline data
+./scripts/train_models.sh data/baseline
+
+# Stop everything
+./scripts/stop_all.sh
+
+
+🚀 INDIVIDUAL SERVICE COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Start Backend (FastAPI on port 8000)
+python3 backend/app.py
+
+# Start Frontend (Vite on port 5173)
+cd frontend && npm run dev
+
+# Stream simulated sensor data
+python3 tools/data_collect.py --stream ws://127.0.0.1:8000/ws/ingest --simulate
+
+# Stream real Arduino sensor data
+python3 tools/data_collect.py --stream ws://127.0.0.1:8000/ws/ingest
+
+
+🔌 ARDUINO COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Find Arduino port
+ls /dev/ttyACM* /dev/ttyUSB*
+
+# Install Arduino CLI
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+
+# List available Arduino boards
+arduino-cli board list
+
+# Upload sketch to Arduino (change port as needed)
+arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega arduino/DATA_COLLECTION.ino
+
+# Read serial data from Arduino (Ctrl+C to stop)
+cat /dev/ttyACM0
+
+
+📊 DATA COLLECTION COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Automated baseline collection (3 days)
+./scripts/collect_baseline.sh 3d data/baseline
+
+# Automated baseline collection (1 hour test)
+./scripts/collect_baseline.sh 1h data/baseline_test
+
+# Custom baseline collection
+python3 tools/baseline_collector.py \
+  --duration 3d \
+  --output-dir data/baseline \
+  --structure-name "My Structure" \
+  --simulate
+
+
+🤖 ML MODEL TRAINING COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Automated training
+./scripts/train_models.sh data/baseline
+
+# Training with custom contamination rate
+./scripts/train_models.sh data/baseline 0.05
+
+# Manual training
+python3 tools/train_ml_models.py \
+  --baseline-dir data/baseline \
+  --contamination 0.1 \
+  --verify
+
+
+📋 VERIFY & DIAGNOSTIC COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Check running processes
+ps aux | grep -E "python3|npm" | grep -v grep
+
+# Check open ports
+netstat -tulpn | grep -E "8000|5173"
+
+# Check what's using port 8000
+lsof -i :8000
+
+# Check what's using port 5173
+lsof -i :5173
+
+# View backend logs
+tail -f /tmp/backend.log
+
+# View frontend logs
+tail -f /tmp/frontend.log
+
+# List trained models
+ls -lh backend/ml_models/trained/
+
+# List baseline data
+ls -lh data/baseline/
+
+# Verify system health
+curl http://localhost:8000/health
+
+# Run integration tests
+python3 tools/test_streaming.py
+
+# Check available baselines
+curl http://localhost:8000/api/baseline/list
+
+
+🛑 STOPPING COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Stop everything at once
+./scripts/stop_all.sh
+
+# Kill backend only
+pkill -f "python3 app.py"
+
+# Kill frontend only
+pkill -f "npm run dev"
+
+# Kill data collection only
+pkill -f "data_collect.py"
+
+# Kill all Python processes (careful!)
+pkill -f python3
+
+# Kill all Node processes (careful!)
+pkill -f node
+
+
+💾 BACKUP & CLEANUP COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Backup baseline data
+cp -r data/baseline data/baseline_backup
+
+# Backup trained models
+cp -r backend/ml_models/trained backend/ml_models/trained_backup
+
+# Clear baseline data
+rm -rf data/baseline/
+
+# Clear trained models
+rm -rf backend/ml_models/trained/
+
+# Clear frontend dependencies
+cd frontend && rm -rf node_modules package-lock.json
+
+# Full clean restart
+rm -rf data/baseline/ backend/ml_models/trained/ frontend/node_modules/
+./scripts/full_automation.sh
+
+
+📱 DASHBOARD COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Open dashboard (macOS)
+open http://localhost:5173/live-monitoring
+
+# Open dashboard (Linux)
+xdg-open http://localhost:5173/live-monitoring
+
+# Open dashboard (Windows)
+start http://localhost:5173/live-monitoring
+
+# API documentation
+open http://localhost:8000/docs
+
+
+🔧 TROUBLESHOOTING COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+# Backend troubleshooting
+lsof -i :8000
+pkill -f "python3 app.py"
+sleep 2
+python3 backend/app.py
+
+# Frontend troubleshooting
+npm cache clean --force
+cd frontend && rm -rf node_modules package-lock.json
+npm install
+npm run dev
+
+# ML dependencies issue
+pip install scikit-learn joblib pywavelets tensorflow pandas
+
+# Arduino issue
+ls /dev/ttyACM*
+arduino-cli board list
+arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:avr:mega arduino/DATA_COLLECTION.ino
+
+# Data collection issue
+python3 tools/data_collect.py --stream ws://127.0.0.1:8000/ws/ingest --simulate
+
+# Check all processes
+ps aux | head -20
+
+
+📚 INSTALLATION COMMANDS (One-time setup)
+───────────────────────────────────────────────────────────────────────────────
+
+# Install backend dependencies
+cd backend && pip install -r requirements.txt
+
+# Install frontend dependencies
+cd frontend && npm install
+
+# Install ML dependencies
+pip install scikit-learn joblib pywavelets tensorflow pandas
+
+# Install Arduino CLI
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+
+# Make all scripts executable
+chmod +x scripts/*.sh
+
+
+🎓 FULL 10-DAY AUTOMATION TIMELINE
+───────────────────────────────────────────────────────────────────────────────
+
+Days 1-3: Collect baseline
+  ./scripts/collect_baseline.sh 3d data/baseline
+
+Days 3-5: Train models
+  ./scripts/train_models.sh data/baseline
+
+Days 5-7: Deploy
+  ./scripts/stop_all.sh
+  python3 backend/app.py
+  open http://localhost:5173/live-monitoring
+
+Days 7-10: Validate
+  # Monitor dashboard
+  # Test with anomalies
+  # Fine-tune thresholds
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                            SUMMARY TABLE
+═══════════════════════════════════════════════════════════════════════════════
+
+Command                                     | What It Does
+──────────────────────────────────────────────────────────────────────────────
+chmod +x scripts/*.sh                       | Make scripts executable
+./scripts/full_automation.sh                | Full end-to-end automation
+./scripts/start_all.sh                      | Start backend+frontend+data
+./scripts/stop_all.sh                       | Stop all services
+./scripts/collect_baseline.sh 3d            | Collect 3-day baseline
+./scripts/train_models.sh data/baseline     | Train ML models
+python3 backend/app.py                      | Start backend only
+cd frontend && npm run dev                  | Start frontend only
+python3 tools/data_collect.py --simulate    | Stream simulated data
+ps aux | grep -E "python3|npm"              | Check running processes
+tail -f /tmp/backend.log                    | View backend logs
+curl http://localhost:8000/health           | Check backend health
+python3 tools/test_streaming.py             | Run tests
+open http://localhost:5173/live-monitoring  | Open dashboard
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✨ START HERE:
+
+1. chmod +x scripts/*.sh
+2. ./scripts/full_automation.sh
+3. open http://localhost:5173/live-monitoring
+
+That's it! Everything else is automated! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
