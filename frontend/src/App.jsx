@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Analysis from './pages/Analysis';
 import SensorSetup from './pages/SensorSetup';
 import LiveMonitoring from './pages/LiveMonitoring';
+import RealtimeDashboard from './components/Dashboard';
 
 export default function App() {
   const [currentAnalysisId, setCurrentAnalysisId] = useState(null);
@@ -29,6 +30,10 @@ export default function App() {
                   onAnalysisComplete={setAnalysisResults}
                 />
               } 
+            />
+            <Route 
+              path="/realtime" 
+              element={<RealtimeDashboard />} 
             />
             <Route 
               path="/dashboard/:analysisId" 

@@ -17,7 +17,7 @@ export default function Upload() {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [fs, setFs] = useState(1000);
+  const [fs, setFs] = useState(100); // IAI Hardware: 100 samples per second
   const [maxModes, setMaxModes] = useState(5);
 
   const handleFileSelect = async (fileType, file) => {
@@ -86,7 +86,7 @@ export default function Upload() {
         fs: parseFloat(fs),
         max_modes: parseInt(maxModes),
         min_freq: 1.0,
-        max_freq: 450.0,
+        max_freq: 49.0, // Safe limit: 98% of Nyquist for 100 Hz sampling rate
       };
 
       // Start analysis

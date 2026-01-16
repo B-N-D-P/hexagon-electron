@@ -21,10 +21,10 @@ API_VERSION = "1.0.0"
 API_DESCRIPTION = "Advanced system for analyzing structural repair quality with damage localization"
 
 # Analysis Parameters
-DEFAULT_FS = 1000.0  # Hz
+DEFAULT_FS = 100.0  # Hz (IAI Hardware: 100 samples per second)
 DEFAULT_MAX_MODES = 5
 DEFAULT_MIN_FREQ = 1.0   # Hz
-DEFAULT_MAX_FREQ = 450.0  # Hz
+DEFAULT_MAX_FREQ = 49.0  # Hz (Safe limit: 98% of Nyquist for 100 Hz sampling rate)
 DEFAULT_BAND_HZ = 5.0
 
 # Damage Localization

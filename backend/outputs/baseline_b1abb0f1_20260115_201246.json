@@ -1,0 +1,18 @@
+{
+  "profile_id": "b1abb0f1",
+  "name": "LiveBaseline_2026-01-15",
+  "created_at": "2026-01-15T14:27:46.253669Z",
+  "fs": 100.0,
+  "num_sensors": 2,
+  "peaks": [],
+  "rms_baseline": {
+    "0": 0.0,
+    "1": 0.0
+  },
+  "psd_profile": {},
+  "frequencies": null,
+  "damping_ratios": null,
+  "mode_shapes": null,
+  "source_file": null,
+  "description": "Created from live monitoring"
+}

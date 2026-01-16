@@ -621,27 +621,61 @@ export default function Dashboard() {
         {/* Export Tab */}
         {activeTab === 'export' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <a
-              href={`/api/v1/results/${analysisId}/download/json`}
-              className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-blue-500 transition flex items-center justify-between group"
+            <button
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                window.location.href = `${apiUrl}/api/v1/results/${analysisId}/download/json`;
+              }}
+              className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-blue-500 transition flex items-center justify-between group cursor-pointer"
             >
               <div>
-                <h3 className="text-lg font-bold text-white mb-1">JSON Report</h3>
+                <h3 className="text-lg font-bold text-white mb-1">📊 JSON Report</h3>
                 <p className="text-gray-400 text-sm">Full analysis data in JSON format</p>
               </div>
               <Download size={28} className="text-blue-400 group-hover:scale-110 transition" />
-            </a>
+            </button>
 
-            <a
-              href={`/api/v1/results/${analysisId}/download/pdf`}
-              className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-blue-500 transition flex items-center justify-between group"
+            <button
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                window.location.href = `${apiUrl}/api/v1/results/${analysisId}/download/pdf`;
+              }}
+              className="bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-blue-500 transition flex items-center justify-between group cursor-pointer"
             >
               <div>
-                <h3 className="text-lg font-bold text-white mb-1">PDF Report</h3>
-                <p className="text-gray-400 text-sm">Professional printable report</p>
+                <h3 className="text-lg font-bold text-white mb-1">📄 Standard PDF</h3>
+                <p className="text-gray-400 text-sm">Single page professional report</p>
               </div>
               <Download size={28} className="text-blue-400 group-hover:scale-110 transition" />
-            </a>
+            </button>
+
+            <button
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                window.location.href = `${apiUrl}/api/v1/results/${analysisId}/download/comprehensive-pdf`;
+              }}
+              className="bg-slate-800 rounded-lg p-6 border border-cyan-500 hover:border-cyan-400 transition flex items-center justify-between group cursor-pointer"
+            >
+              <div>
+                <h3 className="text-lg font-bold text-cyan-400 mb-1">⭐ Comprehensive PDF</h3>
+                <p className="text-gray-400 text-sm">2+ pages with ALL graphs & metrics</p>
+              </div>
+              <Download size={28} className="text-cyan-400 group-hover:scale-110 transition" />
+            </button>
+
+            <button
+              onClick={() => {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                window.location.href = `${apiUrl}/api/v1/results/${analysisId}/download/enhanced-html`;
+              }}
+              className="bg-slate-800 rounded-lg p-6 border border-green-500 hover:border-green-400 transition flex items-center justify-between group cursor-pointer"
+            >
+              <div>
+                <h3 className="text-lg font-bold text-green-400 mb-1">🎨 Interactive HTML</h3>
+                <p className="text-gray-400 text-sm">Hexagon chart + interactive graphs</p>
+              </div>
+              <Download size={28} className="text-green-400 group-hover:scale-110 transition" />
+            </button>
           </div>
         )}
       </div>

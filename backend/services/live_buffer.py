@@ -200,10 +200,12 @@ class PeakTracker:
             prominence_threshold = np.percentile(psd_filt, prominence_percentile)
             
             # Find peaks
+            # Ensure distance is at least 1 to avoid scipy validation error
+            distance = max(1, int(self.fs / (self.max_freq - self.min_freq) * 0.05))
             peaks, properties = find_peaks(
                 psd_filt,
                 prominence=prominence_threshold / 10,
-                distance=self.fs / (self.max_freq - self.min_freq) * 0.05
+                distance=distance
             )
             
             if len(peaks) == 0:

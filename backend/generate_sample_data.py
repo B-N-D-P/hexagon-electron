@@ -16,7 +16,7 @@ from pathlib import Path
 import sys
 
 # Parameters
-FS = 1000.0  # Sampling rate (Hz)
+FS = 100.0  # Sampling rate (Hz) - IAI Hardware: 100 samples per second
 DURATION = 10.0  # Duration (seconds)
 NUM_SENSORS = 5
 NUM_SAMPLES = int(FS * DURATION)
