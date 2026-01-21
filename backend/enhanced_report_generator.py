@@ -251,7 +251,7 @@ def create_recovery_trajectory_chart(modal_data):
 
 def create_damping_comparison_chart(modal_data):
     """Create damping ratio comparison chart"""
-    modes = list(range(1, len(modal_data['original']['frequencies']) + 1))
+    modes = list(range(1, len(modal_data['original']['natural_frequencies_hz']) + 1))
     
     fig = go.Figure(data=[
         go.Bar(
@@ -288,10 +288,10 @@ def create_damping_comparison_chart(modal_data):
 
 def create_energy_distribution_chart(modal_data):
     """Create energy distribution chart"""
-    modes = list(range(1, len(modal_data['original']['frequencies']) + 1))
+    modes = list(range(1, len(modal_data['original']['natural_frequencies_hz']) + 1))
     
     # Estimate energy distribution (proportional to frequency * damping)
-    orig_energy = [modal_data['original']['frequencies'][i] * 10 for i in range(len(modes))]
+    orig_energy = [modal_data['original']['natural_frequencies_hz'][i] * 10 for i in range(len(modes))]
     total_energy = sum(orig_energy)
     orig_energy_pct = [e/total_energy*100 for e in orig_energy]
     
@@ -317,11 +317,11 @@ def create_energy_distribution_chart(modal_data):
 
 def create_frequency_shift_chart(modal_data):
     """Create frequency shift analysis chart"""
-    modes = list(range(1, len(modal_data['original']['frequencies']) + 1))
+    modes = list(range(1, len(modal_data['original']['natural_frequencies_hz']) + 1))
     
-    orig_freqs = modal_data['original']['frequencies']
-    dmg_freqs = modal_data['damaged']['frequencies']
-    rep_freqs = modal_data['repaired']['frequencies']
+    orig_freqs = modal_data['original']['natural_frequencies_hz']
+    dmg_freqs = modal_data['damaged']['natural_frequencies_hz']
+    rep_freqs = modal_data['repaired']['natural_frequencies_hz']
     
     dmg_shift = [(dmg_freqs[i] - orig_freqs[i])/orig_freqs[i]*100 for i in range(len(modes))]
     rep_shift = [(rep_freqs[i] - orig_freqs[i])/orig_freqs[i]*100 for i in range(len(modes))]
@@ -361,11 +361,11 @@ def create_frequency_shift_chart(modal_data):
 
 def create_mode_summary_chart(modal_data):
     """Create mode summary heatmap"""
-    modes = list(range(1, len(modal_data['original']['frequencies']) + 1))
+    modes = list(range(1, len(modal_data['original']['natural_frequencies_hz']) + 1))
     
-    orig_freqs = modal_data['original']['frequencies']
-    dmg_freqs = modal_data['damaged']['frequencies']
-    rep_freqs = modal_data['repaired']['frequencies']
+    orig_freqs = modal_data['original']['natural_frequencies_hz']
+    dmg_freqs = modal_data['damaged']['natural_frequencies_hz']
+    rep_freqs = modal_data['repaired']['natural_frequencies_hz']
     
     # Create a summary matrix
     z_data = [orig_freqs, dmg_freqs, rep_freqs]
@@ -398,28 +398,44 @@ def create_enhanced_report(analysis_data, modal_data, quality_data, output_file=
     """
     Create comprehensive enhanced HTML report with all visualizations
     """
-    
-    # Generate all charts
-    hexagon_chart = create_hexagon_chart(quality_data)
-    freq_chart = create_frequency_comparison_chart(modal_data)
-    quality_chart = create_quality_breakdown_chart(quality_data)
-    trajectory_chart = create_recovery_trajectory_chart(modal_data)
-    
-    # Create additional graphs for completeness
-    damping_chart = create_damping_comparison_chart(modal_data)
-    energy_chart = create_energy_distribution_chart(modal_data)
-    frequency_shift_chart = create_frequency_shift_chart(modal_data)
-    mode_summary_chart = create_mode_summary_chart(modal_data)
-    
-    # Convert to HTML
-    hexagon_html = fig_to_html(hexagon_chart)
-    freq_html = fig_to_html(freq_chart)
-    quality_html = fig_to_html(quality_chart)
-    trajectory_html = fig_to_html(trajectory_chart)
-    damping_html = fig_to_html(damping_chart)
-    energy_html = fig_to_html(energy_chart)
-    frequency_shift_html = fig_to_html(frequency_shift_chart)
-    mode_summary_html = fig_to_html(mode_summary_chart)
+    try:
+        print(f"Starting enhanced report generation for: {output_file}")
+        
+        # Generate all charts
+        print("Generating hexagon chart...")
+        hexagon_chart = create_hexagon_chart(quality_data)
+        print("Generating frequency comparison chart...")
+        freq_chart = create_frequency_comparison_chart(modal_data)
+        print("Generating quality breakdown chart...")
+        quality_chart = create_quality_breakdown_chart(quality_data)
+        print("Generating recovery trajectory chart...")
+        trajectory_chart = create_recovery_trajectory_chart(modal_data)
+        
+        # Create additional graphs for completeness
+        print("Generating damping comparison chart...")
+        damping_chart = create_damping_comparison_chart(modal_data)
+        print("Generating energy distribution chart...")
+        energy_chart = create_energy_distribution_chart(modal_data)
+        print("Generating frequency shift chart...")
+        frequency_shift_chart = create_frequency_shift_chart(modal_data)
+        print("Generating mode summary chart...")
+        mode_summary_chart = create_mode_summary_chart(modal_data)
+        
+        # Convert to HTML
+        print("Converting charts to HTML...")
+        hexagon_html = fig_to_html(hexagon_chart)
+        freq_html = fig_to_html(freq_chart)
+        quality_html = fig_to_html(quality_chart)
+        trajectory_html = fig_to_html(trajectory_chart)
+        damping_html = fig_to_html(damping_chart)
+        energy_html = fig_to_html(energy_chart)
+        frequency_shift_html = fig_to_html(frequency_shift_chart)
+        mode_summary_html = fig_to_html(mode_summary_chart)
+    except Exception as e:
+        print(f"ERROR during chart generation: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
     
     # Prepare data for display
     interpretation = quality_data.get('interpretation', 'Analysis Complete')
@@ -852,11 +868,25 @@ def create_enhanced_report(analysis_data, modal_data, quality_data, output_file=
 """
     
     # Write to file
-    with open(output_file, 'w') as f:
-        f.write(html_content)
-    
-    print(f"✓ Enhanced report generated: {output_file}")
-    return output_file
+    try:
+        print(f"Writing HTML report to: {output_file}")
+        with open(output_file, 'w') as f:
+            f.write(html_content)
+        
+        # Verify file was written
+        import os
+        if os.path.exists(output_file):
+            file_size = os.path.getsize(output_file)
+            print(f"✓ Enhanced report generated: {output_file} ({file_size} bytes)")
+        else:
+            raise Exception(f"File was not created at {output_file}")
+        
+        return output_file
+    except Exception as e:
+        print(f"ERROR writing report to file: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 if __name__ == "__main__":
     print("Enhanced Report Generator Module")

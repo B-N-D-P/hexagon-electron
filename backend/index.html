@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structural Repair Analysis System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: rgba(28, 42, 70, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .analysis-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .analysis-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .analysis-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateX(5px);
+        }
+
+        .analysis-option.selected {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .radio-wrapper {
+            width: 24px;
+            height: 24px;
+            margin-right: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .radio-input {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-emoji {
+            font-size: 1.3rem;
+        }
+
+        .option-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.3);
+            color: #a8b8ff;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge.new {
+            background: rgba(76, 175, 80, 0.3);
+            color: #81c784;
+            animation: pulse 2s infinite;
+        }
+
+        .badge.ml {
+            background: rgba(156, 39, 176, 0.3);
+            color: #ba68c8;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .info-box {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .info-box.visible {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .info-box-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-icon {
+            font-size: 3rem;
+        }
+
+        .info-box-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .info-box-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .info-box-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .feature-item {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-item::before {
+            content: "✓";
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .upload-section.visible {
+            display: block;
+        }
+
+        .upload-section-title {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .required-star {
+            color: #ef5350;
+        }
+
+        .upload-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-box:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #667eea;
+        }
+
+        .upload-box.dragover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .upload-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .upload-box p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-info {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #81c784;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading h3 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .loading p {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .info-note {
+            background: rgba(255, 152, 0, 0.1);
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .analysis-option {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Structural Repair Analysis</h1>
+            <p>Advanced AI-Powered Structural Health Monitoring</p>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Analysis Type</h2>
+            
+            <div class="analysis-options">
+                <!-- Repair Quality Analysis -->
+                <label class="analysis-option" data-type="repair-quality">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="analysisType" value="repair-quality" class="radio-input">
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">
+                            <span class="option-emoji">🔧</span>
+                            Repair Quality
+                        </div>
+                        <div class="option-description">
+                            Original → Damaged → Repaired
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Comparative Analysis -->
+                <label class="analysis-option" data-type="comparative">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="analysisType" value="comparative" class="radio-input">
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">
+                            <span class="option-emoji">📊</span>
+                            Comparative
+                        </div>
+                        <div class="option-description">
+                            Damaged vs Repaired
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Localization (2-Sensor) -->
+                <label class="analysis-option" data-type="localization">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="analysisType" value="localization" class="radio-input">
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">
+                            <span class="option-emoji">📍</span>
+                            Localization (2-Sensor)
+                        </div>
+                        <div class="option-description">
+                            Locate damage between sensors
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Baseline Calculation (ML) -->
+                <label class="analysis-option" data-type="baseline-ml">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="analysisType" value="baseline-ml" class="radio-input">
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">
+                            <span class="option-emoji">🤖</span>
+                            Baseline Calculation (ML)
+                            <span class="badge ml">ML</span>
+                        </div>
+                        <div class="option-description">
+                            Predict baseline from damaged data using hybrid model
+                        </div>
+                    </div>
+                </label>
+
+                <!-- NEW: Damage Specification (AI Classifier) -->
+                <label class="analysis-option" data-type="damage-classifier">
+                    <div class="radio-wrapper">
+                        <input type="radio" name="analysisType" value="damage-classifier" class="radio-input">
+                    </div>
+                    <div class="option-content">
+                        <div class="option-title">
+                            <span class="option-emoji">🔍</span>
+                            Damage Specification (AI)
+                            <span class="badge new">NEW</span>
+                            <span class="badge ml">98.28% Accuracy</span>
+                        </div>
+                        <div class="option-description">
+                            Classify damage type: healthy, deformation, bolt damage, missing beam, brace damage
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Info Box for Selected Analysis Type -->
+            <div id="infoBox" class="info-box" style="display: none;"></div>
+
+            <!-- Upload Section -->
+            <div id="uploadSection" class="upload-section">
+                <div id="uploadBox" class="upload-box">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop CSV file here</h3>
+                    <p>or click to select</p>
+                    <p id="uploadDescription" style="margin-top: 15px; font-size: 0.85rem; opacity: 0.7;">CSV, XLSX (max 50 MB)</p>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx">
+                </div>
+
+                <div id="fileInfo" class="file-info" style="display: none;">
+                    <strong>✓ File ready:</strong> <span id="fileName"></span>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <h3>Analyzing...</h3>
+                    <p id="loadingMessage">Processing your data</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button id="analyzeBtn" class="btn" style="display: none;">
+                        ▶ Run Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let currentFileId = null;
+        let selectedAnalysisType = null;
+
+        // Analysis type configuration
+        const analysisConfig = {
+            'repair-quality': {
+                icon: '🔧',
+                title: 'Repair Quality Analysis',
+                description: 'Compare original, damaged, and repaired structure states to evaluate repair effectiveness.',
+                features: [],
+                uploadTitle: 'Original, Damaged, and Repaired Data',
+                uploadDescription: 'CSV, XLSX (max 50 MB)',
+                endpoint: null
+            },
+            'comparative': {
+                icon: '📊',
+                title: 'Comparative Analysis',
+                description: 'Compare damaged and repaired structure states to analyze repair improvements.',
+                features: [],
+                uploadTitle: 'Damaged and Repaired Data',
+                uploadDescription: 'CSV, XLSX (max 50 MB)',
+                endpoint: null
+            },
+            'localization': {
+                icon: '📍',
+                title: 'Damage Localization',
+                description: 'Locate damage between two sensors using dual sensor analysis.',
+                features: [],
+                uploadTitle: '2-Sensor Data',
+                uploadDescription: 'CSV, XLSX (max 50 MB)',
+                endpoint: null
+            },
+            'baseline-ml': {
+                icon: '🤖',
+                title: 'ML Baseline Prediction',
+                description: 'Upload your damaged/current structure data, and our hybrid ML model will predict what the baseline (healthy) state should be.',
+                features: [
+                    'Trained on 51 real structural samples',
+                    '10 different damage scenarios',
+                    'Hybrid model (frequency + time domain)',
+                    'Confidence score: 35-60%'
+                ],
+                uploadTitle: 'Current/Damaged Structure',
+                uploadDescription: 'CSV, XLSX (max 50 MB)',
+                endpoint: '/api/v1/predict_baseline'
+            },
+            'damage-classifier': {
+                icon: '🔍',
+                title: 'AI Damage Classification',
+                description: 'Upload your damaged structure data, and our AI model will identify the specific type of structural damage with high accuracy.',
+                features: [
+                    'Trained on 230 real structural samples',
+                    '5 different damage types detected',
+                    'Random Forest ML model (98.28% accuracy)',
+                    'Detects: healthy, deformation, bolt damage, missing beam, brace damage'
+                ],
+                uploadTitle: 'Current/Damaged Structure',
+                uploadDescription: 'CSV, XLSX (max 50 MB)',
+                endpoint: '/api/v1/classify-damage'
+            }
+        };
+
+        // Handle analysis type selection
+        document.querySelectorAll('.analysis-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Update selected state
+                document.querySelectorAll('.analysis-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+
+                // Get analysis type
+                selectedAnalysisType = this.dataset.type;
+                const config = analysisConfig[selectedAnalysisType];
+
+                // Show info box
+                const infoBox = document.getElementById('infoBox');
+                infoBox.innerHTML = `
+                    <div class="info-box-header">
+                        <div class="info-box-icon">${config.icon}</div>
+                        <div class="info-box-title">${config.title}</div>
+                    </div>
+                    <div class="info-box-description">
+                        ${config.description}
+                    </div>
+                    ${config.features.length > 0 ? `
+                        <div class="info-box-features">
+                            ${config.features.map(feature => `
+                                <div class="feature-item">${feature}</div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                infoBox.classList.add('visible');
+                infoBox.style.display = 'block';
+
+                // Update upload section
+                const uploadSectionTitle = document.querySelector('.upload-section-title') || document.createElement('h3');
+                uploadSectionTitle.className = 'upload-section-title';
+                uploadSectionTitle.innerHTML = `${config.uploadTitle} <span class="required-star">*</span>`;
+                
+                const uploadSection = document.getElementById('uploadSection');
+                if (!document.querySelector('.upload-section-title')) {
+                    uploadSection.insertBefore(uploadSectionTitle, uploadSection.firstChild);
+                }
+
+                document.getElementById('uploadDescription').textContent = config.uploadDescription;
+
+                // Show upload section
+                uploadSection.classList.add('visible');
+
+                // Reset file state
+                currentFileId = null;
+                document.getElementById('fileInfo').style.display = 'none';
+                document.getElementById('analyzeBtn').style.display = 'none';
+                document.getElementById('infoNote').style.display = 'none';
+            });
+        });
+
+        // Drag and drop handling
+        const uploadBox = document.getElementById('uploadBox');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadBox.addEventListener('click', () => fileInput.click());
+
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.classList.add('dragover');
+        });
+
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('dragover');
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        async function handleFileSelect(file) {
+            if (!selectedAnalysisType) {
+                alert('Please select an analysis type first');
+                return;
+            }
+
+            if (!file.name.endsWith('.csv')) {
+                alert('Please select a CSV file');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('loadingMessage').textContent = 'Uploading file...';
+
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentFileId = data.file_id;
+                    
+                    // Show file info
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('fileInfo').style.display = 'block';
+                    document.getElementById('analyzeBtn').style.display = 'inline-block';
+                    
+                    console.log('File uploaded:', data);
+                } else {
+                    alert('Upload failed: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Upload error: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('visible');
+            }
+        }
+
+        // Handle analysis button
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            if (!currentFileId || !selectedAnalysisType) {
+                alert('Please upload a file first');
+                return;
+            }
+
+            const config = analysisConfig[selectedAnalysisType];
+            
+            if (!config.endpoint) {
+                alert('This analysis type is not yet implemented. Try "Damage Specification (AI)" for the new damage classifier!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('loadingMessage').textContent = 'Analyzing damage...';
+            document.getElementById('analyzeBtn').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${config.endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: currentFileId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Redirect to results page based on analysis type
+                    if (selectedAnalysisType === 'damage-classifier') {
+                        // Store result in sessionStorage
+                        sessionStorage.setItem('damageClassificationResult', JSON.stringify(result));
+                        window.location.href = 'damage_specification.html?result=true';
+                    } else {
+                        console.log('Analysis result:', result);
+                        alert('Analysis complete! Check console for results.');
+                    }
+                } else {
+                    alert('Analysis failed: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Analysis error: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+</html>

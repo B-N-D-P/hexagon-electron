@@ -1,0 +1,53 @@
+{
+  "analysis_id": "5fc40457-f1a",
+  "file_id": "143674b2",
+  "filename": "data_20260119_161036.csv",
+  "classification": {
+    "prediction": "missing_beam",
+    "confidence": 98.75,
+    "probabilities": {
+      "bolt_damage": 1.0,
+      "brace_damage": 0.0,
+      "deformation": 0.0,
+      "healthy": 0.25,
+      "missing_beam": 98.75
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "missing_beam",
+        "probability": 98.75
+      },
+      {
+        "damage_type": "bolt_damage",
+        "probability": 1.0
+      },
+      {
+        "damage_type": "healthy",
+        "probability": 0.25
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Missing Structural Member",
+      "description": "One or more structural beams are missing or completely damaged.",
+      "severity": "Critical",
+      "color": "darkred",
+      "icon": "\u274c",
+      "recommendation": "Critical repair needed. Replace missing structural members immediately."
+    }
+  },
+  "file_info": {
+    "filename": "data_20260119_161036.csv",
+    "file_path": "/home/itachi/structural-repair-web/backend/uploads/143674b2_data_20260119_161036.csv",
+    "num_samples": 2499,
+    "num_sensors": 6,
+    "duration_sec": 24.99,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-21 18:56:15.427644"
+  },
+  "timestamp": "2026-01-21T18:56:17.160700"
+}

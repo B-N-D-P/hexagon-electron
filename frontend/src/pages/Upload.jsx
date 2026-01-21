@@ -19,6 +19,55 @@ export default function Upload() {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [fs, setFs] = useState(100); // IAI Hardware: 100 samples per second
   const [maxModes, setMaxModes] = useState(5);
+  
+  // ML456 baseline prediction state
+  const [ml456Available, setMl456Available] = useState(false);
+  const [predictingBaseline, setPredictingBaseline] = useState(false);
+  const [mlPrediction, setMlPrediction] = useState(null);
+  
+  // Check ML456 availability on mount
+  React.useEffect(() => {
+    const checkML456 = async () => {
+      try {
+        const response = await api.get('/health');
+        setMl456Available(response.data.ml456_available === true);
+      } catch (error) {
+        setMl456Available(false);
+      }
+    };
+    checkML456();
+  }, []);
+  
+  // Predict baseline using ML456
+  const predictBaseline = async () => {
+    if (!files.damaged) {
+      toast.error('Please upload damaged file first');
+      return;
+    }
+    
+    try {
+      setPredictingBaseline(true);
+      toast.info('🔮 Predicting baseline using ML... This may take 10-20 seconds');
+      
+      const response = await api.post(`/api/v1/predict_baseline?file_id=${files.damaged}`);
+      
+      if (response.data.success) {
+        setMlPrediction(response.data);
+        toast.success(`✅ Baseline predicted! Confidence: ${(response.data.confidence * 100).toFixed(1)}%`);
+        
+        // Show warning if confidence is low
+        if (response.data.confidence < 0.5) {
+          toast.warning(response.data.warning, { autoClose: 10000 });
+        }
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to predict baseline';
+      toast.error(`Baseline prediction failed: ${errorMsg}`);
+      setMlPrediction(null);
+    } finally {
+      setPredictingBaseline(false);
+    }
+  };
 
   const handleFileSelect = async (fileType, file) => {
     try {
@@ -73,6 +122,64 @@ export default function Upload() {
       }
     }
 
+    if (analysisType === 'damage_specification') {
+      if (!files.damaged) {
+        toast.error('Damaged structure file is required for damage classification');
+        return;
+      }
+    }
+
+    // Handle Damage Specification separately - it has a different API
+    if (analysisType === 'damage_specification') {
+      try {
+        setAnalyzing(true);
+        const response = await api.post('/api/v1/classify-damage', {
+          file_id: files.damaged
+        });
+        
+        setAnalyzing(false);
+        
+        // Show results in a toast notification
+        const result = response.data;
+        toast.success(`Damage Detected: ${result.prediction.replace('_', ' ').toUpperCase()} (${result.confidence.toFixed(1)}% confidence)`, {
+          autoClose: 5000
+        });
+        
+        // Log full result for debugging
+        console.log('Damage Classification Result:', result);
+        
+        // Download comprehensive reports automatically
+        if (result.reports) {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          
+          toast.info('📄 Downloading comprehensive reports...', { autoClose: 3000 });
+          
+          // Download HTML report
+          setTimeout(() => {
+            window.open(`${apiUrl}${result.reports.html}`, '_blank');
+          }, 500);
+          
+          // Download PDF report
+          setTimeout(() => {
+            const link = document.createElement('a');
+            link.href = `${apiUrl}${result.reports.pdf}`;
+            link.download = `damage_report_${result.analysis_id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success('✅ Reports downloaded successfully!', { autoClose: 3000 });
+          }, 1500);
+        }
+        
+        return;
+      } catch (error) {
+        setAnalyzing(false);
+        const errorMsg = error.response?.data?.detail || error.message || 'Classification failed';
+        toast.error(`Damage classification failed: ${errorMsg}`);
+        console.error('Classification error:', error);
+        return;
+      }
+    }
 
     try {
       setAnalyzing(true);
@@ -203,11 +310,238 @@ export default function Upload() {
                   <p className="text-xs text-gray-400">Locate damage between sensors</p>
                 </div>
               </label>
+
+              <label className="flex items-center p-3 rounded border border-gray-700 cursor-pointer hover:bg-gray-700" 
+                     style={{ borderColor: analysisType === 'baseline_calculation' ? '#ffffff' : undefined, backgroundColor: analysisType === 'baseline_calculation' ? '#374151' : undefined }}>
+                <input
+                  type="radio"
+                  name="analysisType"
+                  value="baseline_calculation"
+                  checked={analysisType === 'baseline_calculation'}
+                  onChange={(e) => setAnalysisType(e.target.value)}
+                  className="w-4 h-4"
+                />
+                <div className="ml-3">
+                  <p className="text-white font-medium text-sm">🤖 Baseline Calculation (ML)</p>
+                  <p className="text-xs text-gray-400">Predict baseline from damaged data using hybrid model</p>
+                </div>
+              </label>
+
+              <label className="flex items-center p-3 rounded border border-gray-700 cursor-pointer hover:bg-gray-700" 
+                     style={{ borderColor: analysisType === 'damage_specification' ? '#ffffff' : undefined, backgroundColor: analysisType === 'damage_specification' ? '#374151' : undefined }}>
+                <input
+                  type="radio"
+                  name="analysisType"
+                  value="damage_specification"
+                  checked={analysisType === 'damage_specification'}
+                  onChange={(e) => setAnalysisType(e.target.value)}
+                  className="w-4 h-4"
+                />
+                <div className="ml-3 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white font-medium text-sm">🔍 Damage Specification (AI)</p>
+                    <span className="px-2 py-0.5 text-xs bg-green-600 text-white rounded-full">NEW</span>
+                    <span className="px-2 py-0.5 text-xs bg-purple-600 text-white rounded-full">98.28%</span>
+                  </div>
+                  <p className="text-xs text-gray-400">Classify damage type: healthy, deformation, bolt damage, missing beam, brace damage</p>
+                </div>
+              </label>
             </div>
           </div>
 
           {/* File Upload Section */}
           <div className="space-y-4">
+            {/* Baseline Calculation Mode - Only needs damaged file */}
+            {analysisType === 'baseline_calculation' && (
+              <div>
+                <div className="mb-4 p-4 bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">🤖</div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">ML Baseline Prediction</h3>
+                      <p className="text-sm text-gray-300 mb-2">
+                        Upload your damaged/current structure data, and our hybrid ML model will predict what the baseline (healthy) state should be.
+                      </p>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>✓ Trained on 51 real structural samples</li>
+                        <li>✓ 10 different damage scenarios</li>
+                        <li>✓ Hybrid model (frequency + time domain)</li>
+                        <li>✓ Confidence score: 35-60%</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Current/Damaged Structure *
+                </label>
+                <FileUploader 
+                  onFileSelect={(file) => handleFileSelect('damaged', file)}
+                  disabled={uploading}
+                  fileId={files.damaged}
+                  metadata={fileMetadata.damaged}
+                />
+                
+                {files.damaged && (
+                  <div className="mt-4 p-4 bg-green-900/30 border border-green-500 rounded-lg">
+                    <p className="text-sm text-green-300 mb-3">
+                      ✅ Ready to predict baseline! Click the button below to start ML prediction.
+                    </p>
+                    <button
+                      onClick={predictBaseline}
+                      disabled={predictingBaseline}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg text-sm font-bold transition-all transform hover:scale-105 disabled:scale-100"
+                    >
+                      {predictingBaseline ? '🔮 Predicting Baseline... (10-20s)' : '🤖 Predict Baseline with ML'}
+                    </button>
+                  </div>
+                )}
+                
+                {/* ML Prediction Result */}
+                {mlPrediction && (
+                  <div className="mt-4 p-5 bg-gradient-to-r from-yellow-900/40 to-orange-900/40 border-2 border-yellow-500 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">✨</div>
+                      <div className="flex-1">
+                        <p className="text-lg font-bold text-yellow-300 mb-3">
+                          🎯 Baseline Predicted Successfully!
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="bg-gray-900/50 p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Confidence</p>
+                            <p className="text-xl font-bold text-white">{(mlPrediction.confidence * 100).toFixed(1)}%</p>
+                            <p className="text-xs text-gray-400">({mlPrediction.confidence_level})</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Method</p>
+                            <p className="text-xl font-bold text-white capitalize">{mlPrediction.method}</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Features</p>
+                            <p className="text-xl font-bold text-white">{mlPrediction.predicted_baseline_features.length}</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Status</p>
+                            <p className="text-lg font-bold text-green-400">✓ Ready</p>
+                          </div>
+                        </div>
+                        {mlPrediction.warning && (
+                          <div className="bg-orange-900/40 border border-orange-500 p-3 rounded mb-3">
+                            <p className="text-xs text-orange-200 leading-relaxed">
+                              ⚠️ {mlPrediction.warning}
+                            </p>
+                          </div>
+                        )}
+                        {mlPrediction.recommendation && (
+                          <div className="bg-blue-900/40 border border-blue-500 p-3 rounded mb-3">
+                            <p className="text-xs text-blue-200 leading-relaxed whitespace-pre-line">
+                              💡 {mlPrediction.recommendation}
+                            </p>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              // Download full prediction data as JSON (includes all metadata)
+                              const dataStr = JSON.stringify(mlPrediction, null, 2);
+                              const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                              const exportFileDefaultName = `predicted_baseline_full_${new Date().getTime()}.json`;
+                              const linkElement = document.createElement('a');
+                              linkElement.setAttribute('href', dataUri);
+                              linkElement.setAttribute('download', exportFileDefaultName);
+                              linkElement.click();
+                              toast.success('Full prediction data downloaded as JSON!');
+                            }}
+                            className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+                          >
+                            📥 Download JSON
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                // Request CSV format from backend
+                                const response = await api.get(`/api/v1/download_baseline_csv?file_id=${files.damaged}`, {
+                                  responseType: 'blob'
+                                });
+                                
+                                // Create download link
+                                const url = window.URL.createObjectURL(new Blob([response.data]));
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', `predicted_baseline_${new Date().getTime()}.csv`);
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                
+                                toast.success('✅ Baseline CSV downloaded! Ready to upload for analysis.', {
+                                  autoClose: 5000
+                                });
+                                toast.info('💡 You can now use this CSV as "Original (Baseline)" in Repair Quality analysis!', {
+                                  autoClose: 8000
+                                });
+                              } catch (error) {
+                                toast.error('CSV download failed. Downloading JSON instead...');
+                                // Fallback: download features array as simple JSON
+                                const dataStr = JSON.stringify(mlPrediction.predicted_baseline_features, null, 2);
+                                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                                const exportFileDefaultName = `predicted_baseline_features_${new Date().getTime()}.json`;
+                                const linkElement = document.createElement('a');
+                                linkElement.setAttribute('href', dataUri);
+                                linkElement.setAttribute('download', exportFileDefaultName);
+                                linkElement.click();
+                              }
+                            }}
+                            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors"
+                          >
+                            📥 Download CSV
+                          </button>
+                          <button
+                            onClick={() => setMlPrediction(null)}
+                            className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+                          >
+                            🔄 Reset
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Damage Specification Mode - AI Damage Classification */}
+            {analysisType === 'damage_specification' && (
+              <div>
+                <div className="mb-4 p-4 bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">🔍</div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">AI Damage Classification</h3>
+                      <p className="text-sm text-gray-300 mb-2">
+                        Upload your damaged structure data, and our AI model will identify the specific type of structural damage with high accuracy.
+                      </p>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>✓ Trained on 230 real structural samples</li>
+                        <li>✓ 5 different damage types detected</li>
+                        <li>✓ Random Forest ML model (98.28% accuracy)</li>
+                        <li>✓ Detects: healthy, deformation, bolt damage, missing beam, brace damage</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Current/Damaged Structure *
+                </label>
+                <FileUploader 
+                  onFileSelect={(file) => handleFileSelect('damaged', file)}
+                  disabled={uploading}
+                  fileId={files.damaged}
+                  metadata={fileMetadata.damaged}
+                />
+              </div>
+            )}
+            
             {analysisType === 'repair_quality' && (
               <div>
                 <label className="block text-sm font-semibold text-white mb-2">
@@ -219,6 +553,68 @@ export default function Upload() {
                   fileId={files.original}
                   metadata={fileMetadata.original}
                 />
+                
+                {/* ML456 Baseline Prediction */}
+                {!files.original && files.damaged && ml456Available && (
+                  <div className="mt-3 p-4 bg-blue-900/30 border border-blue-500 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-blue-300 mb-2">
+                          💡 Don't have baseline data?
+                        </p>
+                        <p className="text-xs text-gray-300 mb-3">
+                          We can predict it using ML trained on real structural data!
+                        </p>
+                        <button
+                          onClick={predictBaseline}
+                          disabled={predictingBaseline || !files.damaged}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded text-sm font-medium transition-colors"
+                        >
+                          {predictingBaseline ? '🔮 Predicting...' : '🤖 Predict Baseline with ML'}
+                        </button>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Confidence: 35-60% • Trained on 51 samples • 10 damage scenarios
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* ML Prediction Result */}
+                {mlPrediction && (
+                  <div className="mt-3 p-4 bg-yellow-900/30 border border-yellow-500 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-yellow-300 mb-2">
+                          ⚠️ ML-Predicted Baseline
+                        </p>
+                        <div className="space-y-2 text-xs">
+                          <p className="text-gray-300">
+                            <span className="font-semibold">Confidence:</span> {(mlPrediction.confidence * 100).toFixed(1)}% ({mlPrediction.confidence_level})
+                          </p>
+                          <p className="text-gray-300">
+                            <span className="font-semibold">Method:</span> {mlPrediction.method}
+                          </p>
+                          <p className="text-gray-300">
+                            <span className="font-semibold">Features:</span> {mlPrediction.predicted_baseline_features.length} predicted
+                          </p>
+                          {mlPrediction.warning && (
+                            <p className="text-yellow-200 mt-2 text-xs italic">
+                              {mlPrediction.warning}
+                            </p>
+                          )}
+                          <button
+                            onClick={() => setMlPrediction(null)}
+                            className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
+                          >
+                            Clear Prediction
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -236,18 +632,20 @@ export default function Upload() {
               </div>
             )}
 
-
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                {analysisType === 'localization' ? 'Current Structure (to localize damage) *' : analysisType === 'comparative' ? 'Damaged Structure *' : 'Damaged Structure *'}
-              </label>
-              <FileUploader 
-                onFileSelect={(file) => handleFileSelect('damaged', file)}
-                disabled={uploading}
-                fileId={files.damaged}
-                metadata={fileMetadata.damaged}
-              />
-            </div>
+            {/* Damaged Structure upload - NOT shown in baseline_calculation mode */}
+            {analysisType !== 'baseline_calculation' && (
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  {analysisType === 'localization' ? 'Current Structure (to localize damage) *' : analysisType === 'comparative' ? 'Damaged Structure *' : 'Damaged Structure *'}
+                </label>
+                <FileUploader 
+                  onFileSelect={(file) => handleFileSelect('damaged', file)}
+                  disabled={uploading}
+                  fileId={files.damaged}
+                  metadata={fileMetadata.damaged}
+                />
+              </div>
+            )}
 
             {(analysisType === 'repair_quality' || analysisType === 'comparative') && (
               <div>

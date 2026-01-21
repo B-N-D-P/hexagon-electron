@@ -1,0 +1,128 @@
+CSV FOLDER VALIDATION REPORT
+================================================================================
+Timestamp: 2026-01-17 21:15:42
+Folder: /home/itachi/data raw/repaired_classified/20_good_repair
+Total Files: 20
+Passed: 20
+Failed: 0
+
+good_repair_01.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.401067
+  Quality Score: 93.9%
+
+good_repair_02.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.403596
+  Quality Score: 92.9%
+
+good_repair_03.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.396709
+  Quality Score: 95.6%
+
+good_repair_04.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.397671
+  Quality Score: 95.2%
+
+good_repair_05.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.400705
+  Quality Score: 94.1%
+
+good_repair_06.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.399393
+  Quality Score: 94.6%
+
+good_repair_07.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.397723
+  Quality Score: 95.2%
+
+good_repair_08.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.400329
+  Quality Score: 94.2%
+
+good_repair_09.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.398811
+  Quality Score: 94.8%
+
+good_repair_10.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.402372
+  Quality Score: 93.4%
+
+good_repair_11.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.397372
+  Quality Score: 95.3%
+
+good_repair_12.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.398184
+  Quality Score: 95.0%
+
+good_repair_13.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.403704
+  Quality Score: 92.9%
+
+good_repair_14.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.401355
+  Quality Score: 93.8%
+
+good_repair_15.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.401816
+  Quality Score: 93.6%
+
+good_repair_16.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.397361
+  Quality Score: 95.4%
+
+good_repair_17.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.401066
+  Quality Score: 93.9%
+
+good_repair_18.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.400282
+  Quality Score: 94.2%
+
+good_repair_19.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.399899
+  Quality Score: 94.4%
+
+good_repair_20.csv
+  Status: PASSED
+  Rows: 2006
+  Mean: -0.403808
+  Quality Score: 92.8%
+

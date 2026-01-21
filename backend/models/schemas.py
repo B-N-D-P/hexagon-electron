@@ -167,3 +167,25 @@ class HealthCheckResponse(BaseModel):
     version: str
     timestamp: datetime
     services: Dict[str, str]
+    ml456_available: bool = False  # ML456 baseline prediction
+    damage_classifier_available: bool = False  # Damage classification model
+
+
+class DamageClassificationRequest(BaseModel):
+    """Request for damage classification"""
+    file_id: str = Field(..., description="ID of uploaded file to classify")
+    
+    
+class DamageClassificationResponse(BaseModel):
+    """Response from damage classification"""
+    file_id: str
+    filename: str
+    prediction: str = Field(..., description="Predicted damage type")
+    confidence: float = Field(..., description="Confidence percentage (0-100)")
+    probabilities: Dict[str, float] = Field(..., description="Probabilities for all damage types")
+    top_3_predictions: List[Dict[str, Any]] = Field(..., description="Top 3 predictions with probabilities")
+    damage_info: Dict[str, str] = Field(..., description="Human-readable damage description")
+    model_info: Dict[str, Any] = Field(..., description="Model metadata")
+    timestamp: datetime
+    analysis_id: Optional[str] = Field(None, description="Analysis ID for accessing reports")
+    reports: Optional[Dict[str, str]] = Field(None, description="URLs to generated reports")

@@ -9,8 +9,6 @@ import Upload from './pages/Upload';
 import Dashboard from './pages/Dashboard';
 import Analysis from './pages/Analysis';
 import SensorSetup from './pages/SensorSetup';
-import LiveMonitoring from './pages/LiveMonitoring';
-import RealtimeDashboard from './components/Dashboard';
 
 export default function App() {
   const [currentAnalysisId, setCurrentAnalysisId] = useState(null);
@@ -32,10 +30,6 @@ export default function App() {
               } 
             />
             <Route 
-              path="/realtime" 
-              element={<RealtimeDashboard />} 
-            />
-            <Route 
               path="/dashboard/:analysisId" 
               element={<Dashboard />} 
             />
@@ -46,10 +40,6 @@ export default function App() {
             <Route 
               path="/sensor-setup" 
               element={<SensorSetup />} 
-            />
-            <Route 
-              path="/live-monitoring" 
-              element={<LiveMonitoring />} 
             />
           </Routes>
         </main>

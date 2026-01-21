@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damage Specification - AI Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 40px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+
+        .upload-section.dragover {
+            background: #e3e8ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .damage-result {
+            text-align: center;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .damage-result.healthy {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .damage-result.warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .damage-result.critical {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .damage-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .damage-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            margin-top: 15px;
+        }
+
+        .description-box {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .description-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .description-box p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .severity-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .severity-none { background: #4facfe; color: white; }
+        .severity-medium { background: #ffa726; color: white; }
+        .severity-high { background: #ef5350; color: white; }
+        .severity-critical { background: #c62828; color: white; }
+
+        .probabilities-table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+
+        .probabilities-table th,
+        .probabilities-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .probabilities-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .probability-bar {
+            height: 30px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .info-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 AI Damage Specification</h1>
+            <p>Advanced ML-Powered Structural Damage Classification</p>
+            <span class="badge">✨ 98.28% Accuracy | 5 Damage Types</span>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="card" id="uploadCard">
+            <h2 style="margin-bottom: 30px; color: #333;">Upload Sensor Data</h2>
+            
+            <div class="upload-section" id="uploadZone">
+                <div class="upload-icon">📁</div>
+                <h3 style="margin-bottom: 10px; color: #667eea;">Drop CSV file here or click to browse</h3>
+                <p style="color: #888; margin-bottom: 20px;">Dual ADXL345 sensor data (6 columns: S1_X_g, S1_Y_g, S1_Z_g, S2_X_g, S2_Y_g, S2_Z_g)</p>
+                <input type="file" id="fileInput" accept=".csv">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Select File</button>
+            </div>
+
+            <div id="selectedFile" style="margin-top: 20px; display: none;">
+                <p style="color: #667eea; font-weight: bold;">✓ Selected: <span id="fileName"></span></p>
+                <button class="btn" id="classifyBtn" style="margin-top: 15px;">🚀 Classify Damage</button>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <h3 style="color: #667eea;">Analyzing sensor data...</h3>
+                <p style="color: #888;">Extracting features and classifying damage type</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card results-section" id="resultsCard">
+            <div id="damageResult"></div>
+            
+            <div class="description-box" id="descriptionBox"></div>
+
+            <h3 style="margin-top: 30px; color: #333;">All Damage Probabilities</h3>
+            <table class="probabilities-table" id="probabilitiesTable">
+                <thead>
+                    <tr>
+                        <th>Damage Type</th>
+                        <th>Probability</th>
+                    </tr>
+                </thead>
+                <tbody id="probabilitiesBody"></tbody>
+            </table>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Model Accuracy</h4>
+                    <p>98.28% on test data</p>
+                </div>
+                <div class="info-card">
+                    <h4>🧠 Algorithm</h4>
+                    <p>Random Forest Classifier</p>
+                </div>
+                <div class="info-card">
+                    <h4>📊 Features</h4>
+                    <p id="featuresCount">69 statistical features</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="window.location.reload()">Analyze Another File</button>
+                <button class="btn back-btn" onclick="window.location.href='index.html'">Back to Analysis Selection</button>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #333;">📚 Detected Damage Types</h2>
+            <div style="display: grid; gap: 15px;">
+                <div style="padding: 15px; background: #f0f8ff; border-left: 4px solid #4facfe; border-radius: 8px;">
+                    <strong style="color: #4facfe;">✅ Healthy:</strong> No structural damage detected
+                </div>
+                <div style="padding: 15px; background: #fff8e1; border-left: 4px solid #ffa726; border-radius: 8px;">
+                    <strong style="color: #ffa726;">⚠️ Deformation:</strong> Bent or deformed structural beams
+                </div>
+                <div style="padding: 15px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px;">
+                    <strong style="color: #ff9800;">🔩 Bolt Damage:</strong> Loose or missing bolt connections
+                </div>
+                <div style="padding: 15px; background: #ffebee; border-left: 4px solid #ef5350; border-radius: 8px;">
+                    <strong style="color: #ef5350;">❌ Missing Beam:</strong> Structural member missing or removed
+                </div>
+                <div style="padding: 15px; background: #fce4ec; border-left: 4px solid #e91e63; border-radius: 8px;">
+                    <strong style="color: #e91e63;">⚡ Brace Damage:</strong> Lateral bracing system damaged
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let currentFileId = null;
+
+        // Check if we came from index page with results
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('result') === 'true') {
+                const savedResult = sessionStorage.getItem('damageClassificationResult');
+                if (savedResult) {
+                    const result = JSON.parse(savedResult);
+                    displayResults(result);
+                    sessionStorage.removeItem('damageClassificationResult');
+                }
+            }
+        });
+
+        // Drag and drop handling
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        async function handleFileSelect(file) {
+            if (!file.name.endsWith('.csv')) {
+                alert('Please select a CSV file');
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('selectedFile').style.display = 'block';
+
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentFileId = data.file_id;
+                    console.log('File uploaded:', data);
+                } else {
+                    alert('Upload failed: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Upload error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        document.getElementById('classifyBtn').addEventListener('click', async () => {
+            if (!currentFileId) {
+                alert('Please upload a file first');
+                return;
+            }
+
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('selectedFile').style.display = 'none';
+
+                const response = await fetch(`${API_BASE_URL}/api/v1/classify-damage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: currentFileId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayResults(result);
+                } else {
+                    alert('Classification failed: ' + (result.detail || 'Unknown error'));
+                    document.getElementById('loading').style.display = 'none';
+                }
+            } catch (error) {
+                alert('Classification error: ' + error.message);
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+
+        function displayResults(result) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('uploadCard').style.display = 'none';
+            document.getElementById('resultsCard').style.display = 'block';
+
+            const damageInfo = result.damage_info;
+            const prediction = result.prediction;
+            const confidence = result.confidence;
+
+            // Determine result class
+            let resultClass = 'warning';
+            if (prediction === 'healthy') resultClass = 'healthy';
+            else if (damageInfo.severity === 'Critical' || damageInfo.severity === 'High') resultClass = 'critical';
+
+            // Display main result
+            document.getElementById('damageResult').innerHTML = `
+                <div class="damage-result ${resultClass}">
+                    <div class="damage-icon">${damageInfo.icon}</div>
+                    <div class="damage-title">${damageInfo.title}</div>
+                    <div class="confidence-badge">Confidence: ${confidence.toFixed(1)}%</div>
+                </div>
+            `;
+
+            // Display description
+            const severityClass = `severity-${damageInfo.severity.toLowerCase()}`;
+            document.getElementById('descriptionBox').innerHTML = `
+                <h3>
+                    Analysis Details 
+                    <span class="${severityClass} severity-indicator">${damageInfo.severity} Severity</span>
+                </h3>
+                <p><strong>Description:</strong> ${damageInfo.description}</p>
+                <p><strong>Recommendation:</strong> ${damageInfo.recommendation}</p>
+            `;
+
+            // Display probabilities
+            const tbody = document.getElementById('probabilitiesBody');
+            tbody.innerHTML = '';
+
+            result.top_3_predictions.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${item.damage_type}</strong></td>
+                    <td>
+                        <div class="probability-bar" style="width: ${item.probability}%">
+                            ${item.probability.toFixed(1)}%
+                        </div>
+                    </td>
+                `;
+            });
+
+            // Update model info
+            document.getElementById('featuresCount').textContent = 
+                `${result.model_info.features_used} statistical features`;
+        }
+    </script>
+</body>
+</html>

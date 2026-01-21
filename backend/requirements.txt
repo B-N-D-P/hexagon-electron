@@ -22,3 +22,4 @@ websockets>=12.0
 joblib>=1.3.0
 pywavelets>=1.6.0
 tensorflow>=2.13.0
+requests

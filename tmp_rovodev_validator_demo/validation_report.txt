@@ -1,0 +1,75 @@
+PRE-ANALYSIS VALIDATION REPORT
+====================================================================================================
+Timestamp: 2026-01-17 21:30:13
+Total Files: 5
+Passed: 1
+Warnings: 0
+Failed: 4
+
+
+async_data_01.csv
+────────────────────────────────────────────────────────────────────────────────
+Status: PASSED
+Data Info:
+  rows: 1000
+  columns: 6
+  column_names: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  detected_sensors: 6
+  sensor_columns: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  range_analysis: {'status': 'PASS', 'has_issues': False, 'detail': '', 'ranges': {'S1_X_g': np.float64(0.1999997527657194), 'S1_Y_g': np.float64(0.1999997527657194), 'S1_Z_g': np.float64(0.19999975276571957), 'S2_X_g': np.float64(0.1999997527657194), 'S2_Y_g': np.float64(0.1999997527657194), 'S2_Z_g': np.float64(0.19999975276571957)}}
+
+extreme_data_01.csv
+────────────────────────────────────────────────────────────────────────────────
+Status: FAILED
+Data Info:
+  rows: 1000
+  columns: 6
+  column_names: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  detected_sensors: 6
+  sensor_columns: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  range_analysis: {'status': 'WARN', 'has_issues': True, 'detail': 'Large range variation between channels (ratio: 861.8x). May indicate asynchronous sampling.', 'ranges': {'S1_X_g': np.float64(0.6321507783481473), 'S1_Y_g': np.float64(0.6610451275122147), 'S1_Z_g': np.float64(0.6967263325232311), 'S2_X_g': np.float64(500.30456077325897), 'S2_Y_g': np.float64(0.5805580283964822), 'S2_Z_g': np.float64(0.7002224826392268)}}
+Issues:
+  ❌ ❌ Multi-Channel Synchronization Issue: Peak frequencies appear at different FFT bins. Peak frequencies appear at different FFT bins within sensor groups. This suggests channels are sampled asynchronously. FIX: Ensure all sensors are sampled simultaneously with the same clock.. FIX: Ensure all sensors are sampled simultaneously with the same clock.
+Warnings:
+  ⚠️  Extreme values detected: Columns with extreme values: S2_X_g: 500.00
+  ⚠️  Range inconsistency: Large range variation between channels (ratio: 861.8x). May indicate asynchronous sampling.
+
+good_data_01.csv
+────────────────────────────────────────────────────────────────────────────────
+Status: FAILED
+Data Info:
+  rows: 1000
+  columns: 6
+  column_names: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  detected_sensors: 6
+  sensor_columns: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  range_analysis: {'status': 'PASS', 'has_issues': False, 'detail': '', 'ranges': {'S1_X_g': np.float64(0.7133207900182517), 'S1_Y_g': np.float64(0.6381778378181359), 'S1_Z_g': np.float64(0.6574783337971635), 'S2_X_g': np.float64(0.6274873503393016), 'S2_Y_g': np.float64(0.6041835895458775), 'S2_Z_g': np.float64(0.6389456869099059)}}
+Issues:
+  ❌ ❌ Multi-Channel Synchronization Issue: Peak frequencies appear at different FFT bins. Peak frequencies appear at different FFT bins within sensor groups. This suggests channels are sampled asynchronously. FIX: Ensure all sensors are sampled simultaneously with the same clock.. FIX: Ensure all sensors are sampled simultaneously with the same clock.
+
+good_data_02.csv
+────────────────────────────────────────────────────────────────────────────────
+Status: FAILED
+Data Info:
+  rows: 1000
+  columns: 6
+  column_names: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  detected_sensors: 6
+  sensor_columns: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  range_analysis: {'status': 'PASS', 'has_issues': False, 'detail': '', 'ranges': {'S1_X_g': np.float64(0.6161943753867508), 'S1_Y_g': np.float64(0.6331676764366796), 'S1_Z_g': np.float64(0.6931714746789834), 'S2_X_g': np.float64(0.6744097177078017), 'S2_Y_g': np.float64(0.6479574529364789), 'S2_Z_g': np.float64(0.6654693900100404)}}
+Issues:
+  ❌ ❌ Multi-Channel Synchronization Issue: Peak frequencies appear at different FFT bins. Peak frequencies appear at different FFT bins within sensor groups. This suggests channels are sampled asynchronously. FIX: Ensure all sensors are sampled simultaneously with the same clock.. FIX: Ensure all sensors are sampled simultaneously with the same clock.
+
+nan_data_01.csv
+────────────────────────────────────────────────────────────────────────────────
+Status: FAILED
+Data Info:
+  rows: 1000
+  columns: 6
+  column_names: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  detected_sensors: 6
+  sensor_columns: ['S1_X_g', 'S1_Y_g', 'S1_Z_g', 'S2_X_g', 'S2_Y_g', 'S2_Z_g']
+  range_analysis: {'status': 'PASS', 'has_issues': False, 'detail': '', 'ranges': {'S1_X_g': np.float64(0.6237470497349715), 'S1_Y_g': np.float64(0.6739444378395992), 'S1_Z_g': np.float64(0.662304179821583), 'S2_X_g': np.float64(0.6820565690607912), 'S2_Y_g': np.float64(0.5953570464942581), 'S2_Z_g': np.float64(0.6571557259188009)}}
+Issues:
+  ❌ Contains 11 NaN/NULL values - data is incomplete
+  ❌ ❌ Multi-Channel Synchronization Issue: Peak frequencies appear at different FFT bins. Peak frequencies appear at different FFT bins within sensor groups. This suggests channels are sampled asynchronously. FIX: Ensure all sensors are sampled simultaneously with the same clock.. FIX: Ensure all sensors are sampled simultaneously with the same clock.
