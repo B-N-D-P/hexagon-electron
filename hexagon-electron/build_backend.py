@@ -85,6 +85,9 @@ def create_pyinstaller_spec(ml_models):
             datas.append((str(src), dst))
     
     spec_content = f"""# -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+
+BACKEND_DIR = Path(r'{str(BACKEND_DIR)}')
 
 block_cipher = None
 
