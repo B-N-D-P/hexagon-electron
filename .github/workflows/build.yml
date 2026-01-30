@@ -61,6 +61,7 @@ jobs:
       
       - name: Build Backend with PyInstaller
         working-directory: hexagon-electron
+        timeout-minutes: 15
         run: python build_backend.py
       
       - name: Build Electron App (Linux)

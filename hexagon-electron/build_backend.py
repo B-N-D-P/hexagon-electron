@@ -205,6 +205,9 @@ def build_backend(spec_file):
         "pyinstaller",
         "--clean",
         "--noconfirm",
+        "--exclude-module=torch.testing",
+        "--exclude-module=torch.distributed",
+        "--exclude-module=matplotlib.tests",
         str(spec_file)
     ]
     
