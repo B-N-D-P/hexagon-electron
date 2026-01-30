@@ -89,8 +89,8 @@ def create_pyinstaller_spec(ml_models):
 block_cipher = None
 
 a = Analysis(
-    ['{BACKEND_DIR / "app.py"}'],
-    pathex=['{BACKEND_DIR}', '{BACKEND_DIR / "services"}'],
+    [str(BACKEND_DIR / 'app.py')],
+    pathex=[str(BACKEND_DIR), str(BACKEND_DIR / 'services')],
     binaries=[],
     datas={datas},
     hiddenimports=[
