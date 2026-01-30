@@ -25,11 +25,11 @@ def check_dependencies():
     """Check if PyInstaller is installed"""
     try:
         import PyInstaller
-        print(f"✓ PyInstaller found: {PyInstaller.__version__}")
+        print(f"[OK] PyInstaller found: {PyInstaller.__version__}")
     except ImportError:
         print("✗ PyInstaller not found. Installing...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
-        print("✓ PyInstaller installed")
+        print("[OK] PyInstaller installed")
 
 def collect_ml_models():
     """Collect all ML model files"""
@@ -42,7 +42,7 @@ def collect_ml_models():
         for file in ML_MODELS_DIR.rglob("*"):
             if file.is_file() and file.suffix in ['.pkl', '.pth', '.h5', '.json', '.joblib', '.py']:
                 models.append(file)
-                print(f"  ✓ {file.relative_to(BACKEND_DIR)}")
+                print(f"  [OK] {file.relative_to(BACKEND_DIR)}")
     
     # ML456 external models
     if ML456_DIR.exists():
@@ -50,7 +50,7 @@ def collect_ml_models():
         for file in ML456_DIR.rglob("*"):
             if file.is_file() and file.suffix in ['.pkl', '.pth', '.h5', '.json', '.joblib']:
                 models.append(file)
-                print(f"  ✓ {file.name}")
+                print(f"  [OK] {file.name}")
     else:
         print(f"  ⚠ ML456 directory not found: {ML456_DIR}")
         print(f"  Continuing without ML456...")
@@ -185,7 +185,7 @@ coll = COLLECT(
     
     spec_file = SCRIPT_DIR / "backend.spec"
     spec_file.write_text(spec_content)
-    print(f"  ✓ Spec file created: {spec_file}")
+    print(f"  [OK] Spec file created: {spec_file}")
     return spec_file
 
 def build_backend(spec_file):
@@ -207,7 +207,7 @@ def build_backend(spec_file):
         print("  ✗ Build failed!")
         sys.exit(1)
     
-    print("  ✓ Backend built successfully")
+    print("  [OK] Backend built successfully")
 
 def copy_to_output():
     """Copy build to output directory"""
@@ -225,13 +225,13 @@ def copy_to_output():
     
     # Copy new build
     shutil.copytree(dist_dir, OUTPUT_DIR)
-    print(f"  ✓ Copied to: {OUTPUT_DIR}")
+    print(f"  [OK] Copied to: {OUTPUT_DIR}")
     
     # Verify executable
     exe_path = OUTPUT_DIR / "backend"
     if exe_path.exists():
         os.chmod(exe_path, 0o755)
-        print(f"  ✓ Backend executable ready: {exe_path}")
+        print(f"  [OK] Backend executable ready: {exe_path}")
     else:
         print(f"  ✗ Executable not found!")
         sys.exit(1)
@@ -252,7 +252,7 @@ def cleanup():
                 shutil.rmtree(item)
             else:
                 item.unlink()
-            print(f"  ✓ Removed: {item.name}")
+            print(f"  [OK] Removed: {item.name}")
 
 def main():
     """Main build process"""
@@ -262,7 +262,7 @@ def main():
         print(f"✗ Backend directory not found: {BACKEND_DIR}")
         sys.exit(1)
     
-    print(f"✓ Backend directory: {BACKEND_DIR}")
+    print(f"[OK] Backend directory: {BACKEND_DIR}")
     
     try:
         check_dependencies()
@@ -273,7 +273,7 @@ def main():
         cleanup()
         
         print("\n" + "=" * 80)
-        print("✓ Backend build complete!")
+        print("[OK] Backend build complete!")
         print("=" * 80)
         print(f"\nBackend ready at: {OUTPUT_DIR}")
         print(f"Executable: {OUTPUT_DIR / 'backend'}")
