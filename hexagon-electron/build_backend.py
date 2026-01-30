@@ -27,7 +27,7 @@ def check_dependencies():
         import PyInstaller
         print(f"[OK] PyInstaller found: {PyInstaller.__version__}")
     except ImportError:
-        print("✗ PyInstaller not found. Installing...")
+        print("[X] PyInstaller not found. Installing...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
         print("[OK] PyInstaller installed")
 
@@ -52,7 +52,7 @@ def collect_ml_models():
                 models.append(file)
                 print(f"  [OK] {file.name}")
     else:
-        print(f"  ⚠ ML456 directory not found: {ML456_DIR}")
+        print(f"  [WARNING] ML456 directory not found: {ML456_DIR}")
         print(f"  Continuing without ML456...")
     
     print(f"\n  Total models collected: {len(models)}")
@@ -204,7 +204,7 @@ def build_backend(spec_file):
     result = subprocess.run(cmd, cwd=SCRIPT_DIR)
     
     if result.returncode != 0:
-        print("  ✗ Build failed!")
+        print("  [X] Build failed!")
         sys.exit(1)
     
     print("  [OK] Backend built successfully")
@@ -216,7 +216,7 @@ def copy_to_output():
     dist_dir = SCRIPT_DIR / "dist" / "backend"
     
     if not dist_dir.exists():
-        print(f"  ✗ Build directory not found: {dist_dir}")
+        print(f"  [X] Build directory not found: {dist_dir}")
         sys.exit(1)
     
     # Remove old output
@@ -233,7 +233,7 @@ def copy_to_output():
         os.chmod(exe_path, 0o755)
         print(f"  [OK] Backend executable ready: {exe_path}")
     else:
-        print(f"  ✗ Executable not found!")
+        print(f"  [X] Executable not found!")
         sys.exit(1)
 
 def cleanup():
@@ -259,7 +259,7 @@ def main():
     
     # Verify backend exists
     if not BACKEND_DIR.exists():
-        print(f"✗ Backend directory not found: {BACKEND_DIR}")
+        print(f"[X] Backend directory not found: {BACKEND_DIR}")
         sys.exit(1)
     
     print(f"[OK] Backend directory: {BACKEND_DIR}")
@@ -280,7 +280,7 @@ def main():
         print(f"\nTotal size: ~{sum(f.stat().st_size for f in OUTPUT_DIR.rglob('*') if f.is_file()) / 1024 / 1024:.1f} MB")
         
     except Exception as e:
-        print(f"\n✗ Build failed: {e}")
+        print(f"\n[X] Build failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
