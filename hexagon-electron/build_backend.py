@@ -152,6 +152,7 @@ a = Analysis(
         'tensorflow', 'tensorboard', 'keras',
         'IPython', 'notebook', 'jupyter',
         'PIL.ImageQt', 'PyQt5', 'PyQt6',
+        'torch.testing', 'torch.distributed', 'torch.distributed.elastic',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -205,9 +206,6 @@ def build_backend(spec_file):
         "pyinstaller",
         "--clean",
         "--noconfirm",
-        "--exclude-module=torch.testing",
-        "--exclude-module=torch.distributed",
-        "--exclude-module=matplotlib.tests",
         str(spec_file)
     ]
     
