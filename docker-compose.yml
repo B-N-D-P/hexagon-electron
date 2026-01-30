@@ -1,73 +1,230 @@
-version: '3.8'
+# ============================================================================
+# DOCKER COMPOSE - STRUCTURAL HEALTH MONITORING SYSTEM
+# ============================================================================
+# Production-ready configuration for complete system deployment
+# 
+# Quick Start:
+#   docker-compose up -d              # Start all services
+#   docker-compose down               # Stop all services
+#   docker-compose logs -f            # View logs
+#   docker-compose ps                 # Check status
+#
+# Services:
+#   - backend: FastAPI server (port 8000)
+#   - frontend: React UI with Nginx (port 3000)
+#
+# Data Persistence:
+#   - uploads: User uploaded CSV files
+#   - outputs: Generated reports and analysis results
+#   - ml_models: Trained ML models
+# ============================================================================
+
+# Docker Compose configuration for Structural Health Monitoring System
 
 services:
-  # Backend API
+  # ==========================================================================
+  # BACKEND API SERVICE
+  # ==========================================================================
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: struct-repair-backend
+      args:
+        - BUILD_DATE=${BUILD_DATE:-2026-01-29}
+        - VERSION=${VERSION:-1.0.0}
+    image: structural-health-monitoring-backend:latest
+    container_name: shm-backend
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
+      # Database
       - DATABASE_URL=sqlite:///./structural_repair.db
+      
+      # Python
       - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONPATH=/app
+      
+      # API Configuration
+      - API_TITLE=Structural Repair Quality Analysis API
+      - API_VERSION=1.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      
+      # Analysis Parameters
+      - DEFAULT_FS=1000
+      - DEFAULT_MAX_MODES=5
+      - DEFAULT_MIN_FREQ=1.0
+      - DEFAULT_MAX_FREQ=450.0
+      
+      # CORS
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:5173","http://127.0.0.1:3000","http://127.0.0.1:5173"]
+      
+      # File Upload
+      - MAX_FILE_SIZE=52428800
+      
+      # Cache
+      - ENABLE_CACHE=true
+      - CACHE_TTL=3600
+      
+      # Analysis
+      - ANALYSIS_TIMEOUT=300
+      
+      # TensorFlow (suppress warnings)
+      - TF_CPP_MIN_LOG_LEVEL=2
+    
     volumes:
-      - ./backend:/app
-      - ./python123:/app/python123
-      - ./backend/uploads:/app/uploads
-      - ./backend/outputs:/app/outputs
+      # Persistent data volumes
+      - uploads_data:/app/uploads
+      - outputs_data:/app/outputs
+      - ml_models_data:/app/ml_models
+      
+      # Mount ML456 Advanced models (optional - models now included in repo)
+      # - /home/itachi/ml456_advanced:/home/itachi/ml456_advanced:ro
+      
+      # Optional: Mount local ML models for development
+      # - ./backend/ml_models:/app/ml_models:ro
+    
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 60s
+      timeout: 15s
       retries: 3
-      start_period: 10s
+      start_period: 40s
+    
     networks:
-      - struct-repair-network
+      - shm-network
+    
     restart: unless-stopped
+    
+    labels:
+      - "com.structural-health-monitoring.service=backend"
+      - "com.structural-health-monitoring.version=1.0.0"
+    
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
 
-  # Frontend Web UI
+  # ==========================================================================
+  # FRONTEND UI SERVICE
+  # ==========================================================================
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: struct-repair-frontend
+      args:
+        - BUILD_DATE=${BUILD_DATE:-2026-01-29}
+        - VERSION=${VERSION:-1.0.0}
+    image: structural-health-monitoring-frontend:latest
+    container_name: shm-frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     environment:
-      - VITE_API_URL=http://localhost:8000
+      # API endpoint (use service name for container-to-container communication)
+      - VITE_API_URL=http://localhost:${BACKEND_PORT:-8000}
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 10s
+    
     networks:
-      - struct-repair-network
+      - shm-network
+    
     restart: unless-stopped
+    
+    labels:
+      - "com.structural-health-monitoring.service=frontend"
+      - "com.structural-health-monitoring.version=1.0.0"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
 
-  # Optional: PostgreSQL database (for future scaling)
+  # ==========================================================================
+  # OPTIONAL: POSTGRESQL DATABASE (Uncomment for production scaling)
+  # ==========================================================================
   # postgres:
   #   image: postgres:15-alpine
-  #   container_name: struct-repair-db
+  #   container_name: shm-database
   #   environment:
-  #     - POSTGRES_DB=structural_repair
-  #     - POSTGRES_USER=repair_user
-  #     - POSTGRES_PASSWORD=secure_password
+  #     - POSTGRES_DB=${POSTGRES_DB:-structural_repair}
+  #     - POSTGRES_USER=${POSTGRES_USER:-repair_user}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secure_password_change_me}
+  #     - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
   #   ports:
-  #     - "5432:5432"
+  #     - "${POSTGRES_PORT:-5432}:5432"
   #   volumes:
   #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-repair_user}"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
   #   networks:
-  #     - struct-repair-network
+  #     - shm-network
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.0'
+  #         memory: 1G
 
+# ============================================================================
+# NETWORKS
+# ============================================================================
 networks:
-  struct-repair-network:
+  shm-network:
     driver: bridge
+    name: structural-health-monitoring
+    labels:
+      - "com.structural-health-monitoring.network=main"
 
+# ============================================================================
+# VOLUMES (Persistent Data)
+# ============================================================================
 volumes:
+  # User uploaded CSV files
+  uploads_data:
+    driver: local
+    name: shm-uploads
+    labels:
+      - "com.structural-health-monitoring.volume=uploads"
+  
+  # Generated reports and analysis results
+  outputs_data:
+    driver: local
+    name: shm-outputs
+    labels:
+      - "com.structural-health-monitoring.volume=outputs"
+  
+  # Trained ML models
+  ml_models_data:
+    driver: local
+    name: shm-ml-models
+    labels:
+      - "com.structural-health-monitoring.volume=ml-models"
+  
+  # PostgreSQL data (uncomment if using postgres)
   # postgres_data:
   #   driver: local
+  #   name: shm-postgres-data

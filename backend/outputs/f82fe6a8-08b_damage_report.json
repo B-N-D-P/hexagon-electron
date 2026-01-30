@@ -1,0 +1,53 @@
+{
+  "analysis_id": "f82fe6a8-08b",
+  "file_id": "fa4f3342",
+  "filename": "data_20260119_155725.csv",
+  "classification": {
+    "prediction": "missing_beam",
+    "confidence": 94.40714285714284,
+    "probabilities": {
+      "bolt_damage": 1.5238095238095237,
+      "brace_damage": 0.0,
+      "deformation": 0.2,
+      "healthy": 3.8690476190476186,
+      "missing_beam": 94.40714285714284
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "missing_beam",
+        "probability": 94.40714285714284
+      },
+      {
+        "damage_type": "healthy",
+        "probability": 3.8690476190476186
+      },
+      {
+        "damage_type": "bolt_damage",
+        "probability": 1.5238095238095237
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Missing Structural Member",
+      "description": "One or more structural beams are missing or completely damaged.",
+      "severity": "Critical",
+      "color": "darkred",
+      "icon": "\u274c",
+      "recommendation": "Critical repair needed. Replace missing structural members immediately."
+    }
+  },
+  "file_info": {
+    "filename": "data_20260119_155725.csv",
+    "file_path": "/mnt/storage/structural-repair-web/backend/uploads/fa4f3342_data_20260119_155725.csv",
+    "num_samples": 2499,
+    "num_sensors": 6,
+    "duration_sec": 24.99,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-27 08:26:23.568475"
+  },
+  "timestamp": "2026-01-27T08:26:28.635412"
+}

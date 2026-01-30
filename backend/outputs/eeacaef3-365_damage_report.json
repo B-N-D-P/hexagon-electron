@@ -1,0 +1,53 @@
+{
+  "analysis_id": "eeacaef3-365",
+  "file_id": "89d6fd05",
+  "filename": "data_20260119_144719.csv",
+  "classification": {
+    "prediction": "bolt_damage",
+    "confidence": 84.82857142857144,
+    "probabilities": {
+      "bolt_damage": 84.82857142857144,
+      "brace_damage": 4.0,
+      "deformation": 0.0,
+      "healthy": 8.17142857142857,
+      "missing_beam": 3.0
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "bolt_damage",
+        "probability": 84.82857142857144
+      },
+      {
+        "damage_type": "healthy",
+        "probability": 8.17142857142857
+      },
+      {
+        "damage_type": "brace_damage",
+        "probability": 4.0
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Bolt Connection Damage",
+      "description": "Loose or missing bolts detected in structural connections.",
+      "severity": "Medium",
+      "color": "orange",
+      "icon": "\ud83d\udd29",
+      "recommendation": "Tighten or replace loose/missing bolts. Inspect all connections."
+    }
+  },
+  "file_info": {
+    "filename": "data_20260119_144719.csv",
+    "file_path": "/home/itachi/structural-repair-web/backend/uploads/89d6fd05_data_20260119_144719.csv",
+    "num_samples": 2499,
+    "num_sensors": 6,
+    "duration_sec": 24.99,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-22 12:22:52.252048"
+  },
+  "timestamp": "2026-01-22T12:22:54.108441"
+}

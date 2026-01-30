@@ -21,9 +21,7 @@ export default function Header() {
           {/* Center: Navigation */}
           <nav className="flex items-center gap-8">
             <Link to="/sensor-setup" className="text-gray-300 hover:text-blue-400 transition text-sm font-medium">Sensor Setup</Link>
-            <Link to="/live-monitoring" className="flex items-center gap-2 text-gray-300 hover:text-red-400 transition text-sm font-medium">
-              <Radio size={16} className="animate-pulse" /> Live Monitor
-            </Link>
+            {/* Live Monitoring Link - REMOVED */}
             <a href="#docs" className="text-gray-300 hover:text-blue-400 transition text-sm font-medium">Docs</a>
           </nav>
 

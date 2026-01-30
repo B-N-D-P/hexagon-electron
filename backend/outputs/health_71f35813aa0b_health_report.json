@@ -1,0 +1,61 @@
+{
+  "analysis_id": "health_71f35813aa0b",
+  "file_id": "ff7aa1bf",
+  "filename": "baseline 12 gate.csv",
+  "timestamp": "2026-01-26T21:25:38.325009",
+  "prediction": "Baseline (Healthy)",
+  "confidence": 36.77783203125,
+  "majority_percentage": 100.0,
+  "probabilities": {
+    "Baseline (Healthy)": {
+      "probability": 36.77783203125,
+      "windows": 8,
+      "percentage": 100.0
+    },
+    "First Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Second Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Top Floor Bolt Loosened": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    }
+  },
+  "top_3_predictions": [
+    {
+      "class": "Baseline (Healthy)",
+      "probability": 36.77783203125
+    },
+    {
+      "class": "Top Floor Bolt Loosened",
+      "probability": 34.34691619873047
+    },
+    {
+      "class": "First Floor Damaged",
+      "probability": 14.854266166687012
+    }
+  ],
+  "num_windows": 8,
+  "num_timesteps": 500,
+  "is_healthy": true,
+  "damage_info": {
+    "title": "Structure is Healthy",
+    "description": "No structural damage detected. All vibration patterns are normal.",
+    "severity": "None",
+    "color": "green",
+    "icon": "\u2705",
+    "recommendation": "Continue regular monitoring and maintenance schedule."
+  },
+  "model_info": {
+    "accuracy": "100.0%",
+    "framework": "PyTorch",
+    "parameters": 702788
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "analysis_id": "health_eabca38069ba",
+  "file_id": "05f0980a",
+  "filename": "baseline 12 gate.csv",
+  "timestamp": "2026-01-26T21:24:22.632903",
+  "prediction": "Baseline (Healthy)",
+  "confidence": 36.77783203125,
+  "majority_percentage": 100.0,
+  "probabilities": {
+    "Baseline (Healthy)": {
+      "probability": 36.77783203125,
+      "windows": 8,
+      "percentage": 100.0
+    },
+    "First Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Second Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Top Floor Bolt Loosened": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    }
+  },
+  "top_3_predictions": [
+    {
+      "class": "Baseline (Healthy)",
+      "probability": 36.77783203125
+    },
+    {
+      "class": "Top Floor Bolt Loosened",
+      "probability": 34.34691619873047
+    },
+    {
+      "class": "First Floor Damaged",
+      "probability": 14.854266166687012
+    }
+  ],
+  "num_windows": 8,
+  "num_timesteps": 500,
+  "is_healthy": 

@@ -1,0 +1,17 @@
+{
+  "test_accuracy": 1.0,
+  "test_loss": 0.2047005482017994,
+  "best_val_accuracy": 1.0,
+  "num_classes": 4,
+  "class_names": [
+    "Baseline (Healthy)",
+    "First Floor Damaged",
+    "Second Floor Damaged",
+    "Top Floor Bolt Loosened"
+  ],
+  "window_size": 500,
+  "stride": 250,
+  "n_features": 6,
+  "total_parameters": 702788,
+  "framework": "pytorch"
+}

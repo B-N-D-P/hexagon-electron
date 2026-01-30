@@ -1,0 +1,115 @@
+======================================================================
+🏗️  ML456 ADVANCED MODEL TRAINING - 12 Gate Data
+======================================================================
+📦 Preparing data for ML456 training...
+  Extracted to: /tmp/ml_training_data_12gate
+  Found folder: Top floor bolt loosened (30 files)
+  Found folder: second floor damaged data 12 gate (27 files)
+  Found folder: first floor damaged (22 files)
+  Found folder: baseline 12 gate (12 files)
+
+✅ Data organized:
+   Baseline: 12 files → /home/itachi/ml456_advanced/data/raw/12gate_data/baseline
+   Damaged: 79 files → /home/itachi/ml456_advanced/data/raw/12gate_data/damaged
+     - Top_floor_bolt_loosened: 30 files
+     - second_floor_damaged_data_12_gate: 27 files
+     - first_floor_damaged: 22 files
+
+🤖 Training ML456 Advanced Models...
+⚠️  XGBoost not available, using Random Forest only
+  Config saved to: /home/itachi/ml456_advanced/config/training_12gate.yaml
+
+  Starting training process...
+  This may take several minutes...
+======================================================================
+ML456 ADVANCED - TRAINING WITH REAL DATA
+======================================================================
+
+[1/4] Loading preprocessed data...
+   Train: (35, 216)
+   Val:   (8, 216)
+   Test:  (8, 216)
+
+   Total samples: 51
+   Damage scenarios: 10
+   Features: 216
+
+[2/4] Training Random Forest...
+
+======================================================================
+TRAINING RANDOM FOREST MODEL
+======================================================================
+Training Random Forest model...
+Training samples: 35
+Feature dimensions: 216 -> 216
+
+Training metrics:
+  MSE:  0.373572
+  MAE:  0.527231
+  R²:   0.620676
+
+Validation metrics:
+  MSE:  0.959722
+  MAE:  0.850233
+  R²:   0.029838
+
+📊 Test Set Performance:
+   R² Score: -0.087088
+   MAE:      0.880983
+   RMSE:     1.013888
+Model saved to /home/itachi/ml456_advanced/checkpoints/advanced/random_forest_model.pkl
+
+📊 Generating visualizations...
+  ✅ Saved: random_forest_predictions_test.png
+  ✅ Saved: random_forest_predictions_val.png
+  ✅ Saved: random_forest_feature_importance.png
+
+[3/4] Skipping XGBoost (not installed)
+
+[4/4] Model Comparison
+======================================================================
+Model                    R² Score          MAE         RMSE
+----------------------------------------------------------------------
+Random Forest           -0.087088     0.880983     1.013888
+
+======================================================================
+TRAINING COMPLETE!
+======================================================================
+
+✅ Models saved to: /home/itachi/ml456_advanced/checkpoints/advanced
+
+📁 Files created:
+   random_forest_feature_importance.json
+   random_forest_feature_importance.png
+   random_forest_metrics.json
+   random_forest_model.pkl
+   random_forest_predictions_test.png
+   random_forest_predictions_val.png
+   training_summary.json
+
+🎯 Next steps:
+   1. Review visualizations in checkpoints/advanced/
+   2. Test inference: python inference/test_inference.py
+   3. Start API: python api/app_advanced.py
+
+✅ Model trained successfully!
+   Model: /home/itachi/ml456_advanced/checkpoints/advanced/random_forest_model.pkl
+   Size: 2167.1 KB
+   Feature extractor: /home/itachi/ml456_advanced/data/processed/feature_extractor.pkl
+
+======================================================================
+🎉 TRAINING COMPLETE!
+======================================================================
+
+Next steps:
+1. Rebuild Docker backend:
+   cd /mnt/storage/structural-repair-web
+   sudo docker compose build backend
+
+2. Restart services:
+   sudo docker compose up -d
+
+3. Test ML Baseline Prediction in the UI
+   - Upload a damaged file
+   - Click 'Predict Baseline with ML'
+   - The new trained model will be used!

@@ -66,22 +66,22 @@ ENABLE_CACHE = True
 ANALYSIS_TIMEOUT = 300  # seconds (5 minutes)
 
 # ============================================================================
-# REAL-TIME STREAMING CONFIGURATION
+# REAL-TIME STREAMING CONFIGURATION - DISABLED
 # ============================================================================
 
-# Live monitoring parameters
-LIVE_BUFFER_DURATION_SEC = 120  # Keep 2 minutes of data
-PSD_WINDOW_SIZE_SEC = 8  # Welch window size
-METRICS_UPDATE_RATE_HZ = 1  # Update frequency
-ENABLE_STREAMING = os.getenv("ENABLE_STREAMING", "true").lower() == "true"
+# Live monitoring parameters - REMOVED
+# LIVE_BUFFER_DURATION_SEC = 120  # Keep 2 minutes of data
+# PSD_WINDOW_SIZE_SEC = 8  # Welch window size
+# METRICS_UPDATE_RATE_HZ = 1  # Update frequency
+# ENABLE_STREAMING = os.getenv("ENABLE_STREAMING", "true").lower() == "true"
 
 # Authentication
-STREAM_INGEST_AUTH_TOKEN = os.getenv("STREAM_INGEST_AUTH_TOKEN", "dev-token")
+# STREAM_INGEST_AUTH_TOKEN = os.getenv("STREAM_INGEST_AUTH_TOKEN", "dev-token")
 
 # Alert thresholds
-JITTER_THRESHOLD_MS = 5.0  # Maximum acceptable jitter
-JITTER_WARN_DURATION_SEC = 3  # Duration to trigger warning
-FREQ_SHIFT_ALERT_PERCENT = 5.0  # Frequency shift to trigger alert
-ENERGY_ANOMALY_THRESHOLD = 0.7  # Normalized energy anomaly score
+# JITTER_THRESHOLD_MS = 5.0  # Maximum acceptable jitter
+# JITTER_WARN_DURATION_SEC = 3  # Duration to trigger warning
+# FREQ_SHIFT_ALERT_PERCENT = 5.0  # Frequency shift to trigger alert
+# ENERGY_ANOMALY_THRESHOLD = 0.7  # Normalized energy anomaly score
 
 print("✓ Configuration loaded successfully")

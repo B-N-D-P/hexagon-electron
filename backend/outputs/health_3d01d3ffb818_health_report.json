@@ -1,0 +1,61 @@
+{
+  "analysis_id": "health_3d01d3ffb818",
+  "file_id": "7ff63af2",
+  "filename": "datafl_20260126_180656.csv",
+  "timestamp": "2026-01-29T20:15:59.431937",
+  "prediction": "First Floor Damaged",
+  "confidence": 99.91465759277344,
+  "majority_percentage": 100.0,
+  "probabilities": {
+    "Baseline (Healthy)": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "First Floor Damaged": {
+      "probability": 99.91465759277344,
+      "windows": 8,
+      "percentage": 100.0
+    },
+    "Second Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Top Floor Bolt Loosened": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    }
+  },
+  "top_3_predictions": [
+    {
+      "class": "First Floor Damaged",
+      "probability": 99.91465759277344
+    },
+    {
+      "class": "Top Floor Bolt Loosened",
+      "probability": 0.03833787515759468
+    },
+    {
+      "class": "Baseline (Healthy)",
+      "probability": 0.025764288380742073
+    }
+  ],
+  "num_windows": 8,
+  "num_timesteps": 500,
+  "is_healthy": false,
+  "damage_info": {
+    "title": "First Floor Structural Damage",
+    "description": "Damage detected on the first floor. Abnormal vibration patterns indicate structural compromise at ground level.",
+    "severity": "High",
+    "color": "red",
+    "icon": "\ud83c\udfd7\ufe0f",
+    "recommendation": "Immediate inspection required. Restrict access and assess structural integrity."
+  },
+  "model_info": {
+    "accuracy": "100.0%",
+    "framework": "PyTorch",
+    "parameters": 702788
+  }
+}

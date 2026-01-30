@@ -1,0 +1,25 @@
+{
+  "models_trained": [
+    "Random Forest"
+  ],
+  "best_model": "Random Forest",
+  "random_forest_r2": -0.08708773642967324,
+  "random_forest_mae": 0.8809827102924517,
+  "xgboost_r2": null,
+  "xgboost_mae": null,
+  "num_train_samples": 35,
+  "num_test_samples": 8,
+  "num_features": 216,
+  "damage_scenarios": [
+    "b1",
+    "b2",
+    "b3",
+    "b4",
+    "b5",
+    "beam5",
+    "beam6",
+    "beam7",
+    "beam8",
+    "beam12"
+  ]
+}

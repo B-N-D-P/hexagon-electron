@@ -139,7 +139,7 @@ class BaselineManager:
         Create a new baseline from live monitoring data.
         
         Args:
-            live_profile: Profile dictionary from live_buffer.capture_baseline_from_buffer()
+            live_profile: Profile dictionary (live monitoring removed)
             name: Optional name for baseline
             
         Returns:
@@ -217,7 +217,7 @@ class BaselineManager:
         return None
     
     def get_current_baseline_dict(self) -> Optional[Dict]:
-        """Get current baseline as a dictionary (for live_buffer)."""
+        """Get current baseline as a dictionary."""
         profile = self.get_current_baseline()
         if profile:
             return profile.to_dict()

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ReferenceLine } from 'recharts';
 import SensorHeatmap2D from '../components/SensorHeatmap2D';
-import { Download, Eye, MapPin, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Download, Eye, MapPin, TrendingUp, AlertTriangle, RefreshCw, Layers } from 'lucide-react';
 import api from '../services/api';
 
 export default function Dashboard() {
@@ -86,8 +86,63 @@ export default function Dashboard() {
         <p className="text-gray-400">ID: {analysisId}</p>
       </div>
 
+      {/* Warnings Section */}
+      {results.warnings && results.warnings.length > 0 && (
+        <div className="bg-yellow-900 bg-opacity-30 border border-yellow-600 rounded p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={20} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-yellow-200 font-semibold mb-2">Analysis Warnings</h3>
+              <ul className="space-y-1 text-sm text-yellow-100">
+                {results.warnings.map((warning, idx) => (
+                  <li key={idx}>• {warning}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quality Score Card */}
       <div className="bg-gray-800 rounded p-8 mb-8 border border-gray-700">
+        
+        {/* Repair Type Badge */}
+        {results.quality_breakdown?.repair_type && (
+          <div className="mb-6 flex justify-center">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold ${
+              results.quality_breakdown.repair_type === 'retrofitting' 
+                ? 'bg-blue-900 border border-blue-500 text-blue-200'
+                : results.quality_breakdown.repair_type === 'restoration'
+                ? 'bg-green-900 border border-green-500 text-green-200'
+                : 'bg-purple-900 border border-purple-500 text-purple-200'
+            }`}>
+              {results.quality_breakdown.repair_type === 'retrofitting' && (
+                <>
+                  <TrendingUp size={18} />
+                  <span>Retrofitting / Strengthening Repair</span>
+                  {results.quality_breakdown.strengthening_factor && results.quality_breakdown.strengthening_factor > 1.0 && (
+                    <span className="ml-2 bg-blue-700 px-2 py-0.5 rounded text-xs">
+                      +{((results.quality_breakdown.strengthening_factor - 1.0) * 100).toFixed(0)}% Stronger
+                    </span>
+                  )}
+                </>
+              )}
+              {results.quality_breakdown.repair_type === 'restoration' && (
+                <>
+                  <RefreshCw size={18} />
+                  <span>Restoration Repair</span>
+                </>
+              )}
+              {results.quality_breakdown.repair_type === 'mixed' && (
+                <>
+                  <Layers size={18} />
+                  <span>Mixed Strategy Repair</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
             <p className="text-gray-400 mb-2">
@@ -155,7 +210,14 @@ export default function Dashboard() {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-xl font-bold text-white mb-4">Frequency Comparison (Hz)</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Frequency Comparison (Hz)
+                {results.quality_breakdown?.repair_type === 'retrofitting' && (
+                  <span className="ml-3 text-sm text-blue-400 font-normal">
+                    📈 Strengthening Detected
+                  </span>
+                )}
+              </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={frequencyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
@@ -169,8 +231,24 @@ export default function Dashboard() {
                   <Line type="monotone" dataKey="original" stroke="#3b82f6" strokeWidth={2.5} strokeDasharray="0" dot={{ fill: '#3b82f6', r: 6 }} activeDot={{ r: 8 }} name="Original" />
                   <Line type="monotone" dataKey="damaged" stroke="#ef4444" strokeWidth={2.5} strokeDasharray="5,5" dot={{ fill: '#ef4444', r: 6 }} activeDot={{ r: 8 }} name="Damaged" />
                   <Line type="monotone" dataKey="repaired" stroke="#10b981" strokeWidth={2.5} strokeDasharray="10,5" dot={{ fill: '#10b981', r: 6 }} activeDot={{ r: 8 }} name="Repaired" />
+                  {results.quality_breakdown?.repair_type === 'retrofitting' && frequencyData.length > 0 && (
+                    <ReferenceLine 
+                      y={frequencyData[0]?.original} 
+                      stroke="#3b82f6" 
+                      strokeDasharray="3 3"
+                      label={{ value: 'Original Baseline', position: 'right', fill: '#3b82f6', fontSize: 12 }}
+                    />
+                  )}
                 </LineChart>
               </ResponsiveContainer>
+              
+              {/* Strengthening summary */}
+              {results.quality_breakdown?.repair_type === 'retrofitting' && results.quality_breakdown?.strengthening_factor && (
+                <div className="mt-3 p-2 bg-blue-900 bg-opacity-20 rounded text-xs text-blue-200">
+                  <strong>Strengthening Factor:</strong> {results.quality_breakdown.strengthening_factor.toFixed(2)}x
+                  ({((results.quality_breakdown.strengthening_factor - 1.0) * 100).toFixed(0)}% increase)
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-800 rounded p-6 border border-gray-700">
@@ -255,14 +333,39 @@ export default function Dashboard() {
               </h3>
               <div className="space-y-3">
                 <p className="text-gray-300">{results.quality_interpretation}</p>
-                <div className="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-4 text-sm text-blue-200">
-                  <p className="font-semibold mb-2">Recommendations:</p>
-                  <ul className="space-y-1 text-xs">
-                    <li>✓ Structure is suitable for normal operating loads</li>
-                    <li>✓ Schedule follow-up inspection in 6 months</li>
-                    <li>✓ Document repair in maintenance records</li>
-                  </ul>
-                </div>
+                
+                {/* Repair Strategy Explanation */}
+                {results.repair_strategy && (
+                  <div className="bg-blue-900 bg-opacity-20 border border-blue-600 rounded p-3">
+                    <p className="text-blue-200 text-sm">
+                      <strong>Strategy:</strong> {results.repair_strategy}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Type-specific recommendations */}
+                {results.quality_breakdown?.repair_type === 'retrofitting' ? (
+                  <div className="bg-blue-900 bg-opacity-30 border border-blue-700 rounded p-4 text-sm text-blue-200">
+                    <p className="font-semibold mb-2">Retrofitting Assessment:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>✓ Structure strengthened beyond original capacity</li>
+                      <li>✓ Improved load-bearing capability achieved</li>
+                      <li>✓ Verify strengthening materials (FRP/steel plates) properly bonded</li>
+                      <li>✓ Schedule follow-up inspection in 3 months</li>
+                      <li>✓ Monitor for delamination or material degradation</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="bg-green-900 bg-opacity-30 border border-green-700 rounded p-4 text-sm text-green-200">
+                    <p className="font-semibold mb-2">Restoration Assessment:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>✓ Structure returned to original condition</li>
+                      <li>✓ Suitable for normal operating loads</li>
+                      <li>✓ Schedule follow-up inspection in 6 months</li>
+                      <li>✓ Document repair in maintenance records</li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           </div>

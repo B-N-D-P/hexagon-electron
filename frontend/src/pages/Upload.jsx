@@ -14,6 +14,7 @@ export default function Upload() {
   });
   const [fileMetadata, setFileMetadata] = useState({});
   const [analysisType, setAnalysisType] = useState('repair_quality');
+  const [repairTypeOverride, setRepairTypeOverride] = useState('auto');
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
@@ -51,6 +52,7 @@ export default function Upload() {
       
       const response = await api.post(`/api/v1/predict_baseline?file_id=${files.damaged}`);
       
+      // Handle successful prediction
       if (response.data.success) {
         setMlPrediction(response.data);
         toast.success(`✅ Baseline predicted! Confidence: ${(response.data.confidence * 100).toFixed(1)}%`);
@@ -59,10 +61,26 @@ export default function Upload() {
         if (response.data.confidence < 0.5) {
           toast.warning(response.data.warning, { autoClose: 10000 });
         }
+      } else {
+        // Handle error response from server (no trained models, etc.)
+        const errorMsg = response.data.error || 'Baseline prediction failed';
+        const recommendation = response.data.recommendation || '';
+        
+        // Show user-friendly error message
+        if (response.data.requires_training) {
+          toast.error(
+            `❌ ${errorMsg}\n\n💡 ${recommendation}`,
+            { autoClose: 8000 }
+          );
+        } else {
+          toast.error(`❌ ${errorMsg}\n${recommendation}`, { autoClose: 6000 });
+        }
+        
+        setMlPrediction(null);
       }
     } catch (error) {
       const errorMsg = error.response?.data?.detail || error.message || 'Failed to predict baseline';
-      toast.error(`Baseline prediction failed: ${errorMsg}`);
+      toast.error(`❌ Baseline prediction failed: ${errorMsg}`);
       setMlPrediction(null);
     } finally {
       setPredictingBaseline(false);
@@ -129,6 +147,53 @@ export default function Upload() {
       }
     }
 
+
+    // Validate health_monitoring
+    if (analysisType === 'health_monitoring') {
+      if (!files.damaged) {
+        toast.error('Sensor data file is required');
+        return;
+      }
+    }
+
+    // Handle Health Monitoring separately - it has a different API
+    if (analysisType === 'health_monitoring') {
+      try {
+        setAnalyzing(true);
+        const response = await api.post('/api/v1/monitor-health', {
+          file_id: files.damaged
+        });
+        
+        setAnalyzing(false);
+        
+        // Show results in a toast notification
+        const result = response.data;
+        
+        const healthIcon = result.is_healthy ? '✅' : '⚠️';
+        const healthStatus = result.is_healthy ? 'HEALTHY' : 'DAMAGE DETECTED';
+        
+        toast.success(
+          `${healthIcon} ${healthStatus}: ${result.prediction}\n` +
+          `Confidence: ${result.confidence.toFixed(1)}%\n` +
+          `Windows Analyzed: ${result.num_windows}`,
+          { 
+            autoClose: 8000,
+            style: { whiteSpace: 'pre-line' }
+          }
+        );
+        
+        // Open health monitoring results
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        window.open(`${apiUrl}/health-monitoring`, '_blank');
+        
+        return;
+      } catch (error) {
+        setAnalyzing(false);
+        const errorMsg = error.response?.data?.detail || error.message || 'Health monitoring failed';
+        toast.error(`❌ ${errorMsg}`);
+        return;
+      }
+    }
     // Handle Damage Specification separately - it has a different API
     if (analysisType === 'damage_specification') {
       try {
@@ -194,6 +259,7 @@ export default function Upload() {
         max_modes: parseInt(maxModes),
         min_freq: 1.0,
         max_freq: 49.0, // Safe limit: 98% of Nyquist for 100 Hz sampling rate
+        repair_type_override: repairTypeOverride === 'auto' ? null : repairTypeOverride,
       };
 
       // Start analysis
@@ -295,6 +361,26 @@ export default function Upload() {
                 </div>
               </label>
 
+
+              <label className="flex items-center p-3 rounded border border-gray-700 cursor-pointer hover:bg-gray-700" 
+                     style={{ borderColor: analysisType === 'health_monitoring' ? '#ffffff' : undefined, backgroundColor: analysisType === 'health_monitoring' ? '#374151' : undefined }}>
+                <input
+                  type="radio"
+                  name="analysisType"
+                  value="health_monitoring"
+                  checked={analysisType === 'health_monitoring'}
+                  onChange={(e) => setAnalysisType(e.target.value)}
+                  className="w-4 h-4"
+                />
+                <div className="ml-3 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white font-medium text-sm">🏗️ Structural Health Monitoring</p>
+                    <span className="px-2 py-0.5 text-xs bg-green-600 text-white rounded-full">NEW</span>
+                    <span className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded-full">100%</span>
+                  </div>
+                  <p className="text-xs text-gray-400">Monitor building health: baseline, first floor, second floor, top floor damage</p>
+                </div>
+              </label>
               <label className="flex items-center p-3 rounded border border-gray-700 cursor-pointer hover:bg-gray-700" 
                      style={{ borderColor: analysisType === 'localization' ? '#ffffff' : undefined, backgroundColor: analysisType === 'localization' ? '#374151' : undefined }}>
                 <input
@@ -347,6 +433,72 @@ export default function Upload() {
                 </div>
               </label>
             </div>
+            
+            {/* Repair Type Override (only for repair_quality) */}
+            {analysisType === 'repair_quality' && (
+              <div className="mt-6 p-4 bg-gray-800 rounded border border-gray-600">
+                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <Info size={18} className="text-blue-400" />
+                  Repair Strategy (Optional)
+                </h3>
+                <p className="text-gray-400 text-sm mb-3">
+                  The system auto-detects repair type. Override only if you know the specific strategy used.
+                </p>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <label className={`cursor-pointer p-3 rounded border transition ${
+                    repairTypeOverride === 'auto' 
+                      ? 'border-blue-500 bg-blue-900 bg-opacity-30' 
+                      : 'border-gray-600 hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="repairType"
+                      value="auto"
+                      checked={repairTypeOverride === 'auto'}
+                      onChange={(e) => setRepairTypeOverride(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-white font-semibold text-sm">Auto-Detect</span>
+                    <p className="text-gray-400 text-xs mt-1">Let system decide</p>
+                  </label>
+                  
+                  <label className={`cursor-pointer p-3 rounded border transition ${
+                    repairTypeOverride === 'restoration' 
+                      ? 'border-green-500 bg-green-900 bg-opacity-30' 
+                      : 'border-gray-600 hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="repairType"
+                      value="restoration"
+                      checked={repairTypeOverride === 'restoration'}
+                      onChange={(e) => setRepairTypeOverride(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-white font-semibold text-sm">Restoration</span>
+                    <p className="text-gray-400 text-xs mt-1">Return to original</p>
+                  </label>
+                  
+                  <label className={`cursor-pointer p-3 rounded border transition ${
+                    repairTypeOverride === 'retrofitting' 
+                      ? 'border-blue-500 bg-blue-900 bg-opacity-30' 
+                      : 'border-gray-600 hover:border-gray-500'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="repairType"
+                      value="retrofitting"
+                      checked={repairTypeOverride === 'retrofitting'}
+                      onChange={(e) => setRepairTypeOverride(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-white font-semibold text-sm">Retrofitting</span>
+                    <p className="text-gray-400 text-xs mt-1">FRP/steel plates</p>
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* File Upload Section */}
@@ -418,7 +570,7 @@ export default function Upload() {
                           </div>
                           <div className="bg-gray-900/50 p-3 rounded">
                             <p className="text-xs text-gray-400 mb-1">Features</p>
-                            <p className="text-xl font-bold text-white">{mlPrediction.predicted_baseline_features.length}</p>
+                            <p className="text-xl font-bold text-white">{mlPrediction.predicted_baseline_features?.length || mlPrediction.predicted_baseline?.length || 0}</p>
                           </div>
                           <div className="bg-gray-900/50 p-3 rounded">
                             <p className="text-xs text-gray-400 mb-1">Status</p>
@@ -482,7 +634,7 @@ export default function Upload() {
                               } catch (error) {
                                 toast.error('CSV download failed. Downloading JSON instead...');
                                 // Fallback: download features array as simple JSON
-                                const dataStr = JSON.stringify(mlPrediction.predicted_baseline_features, null, 2);
+                                const dataStr = JSON.stringify(mlPrediction.predicted_baseline_features || mlPrediction.predicted_baseline || [], null, 2);
                                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
                                 const exportFileDefaultName = `predicted_baseline_features_${new Date().getTime()}.json`;
                                 const linkElement = document.createElement('a');
@@ -520,6 +672,40 @@ export default function Upload() {
                       <p className="text-sm text-gray-300 mb-2">
                         Upload your damaged structure data, and our AI model will identify the specific type of structural damage with high accuracy.
                       </p>
+
+            {/* Health Monitoring Mode - Structural Health AI */}
+            {analysisType === 'health_monitoring' && (
+              <div>
+                <div className="mb-4 p-4 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">🏗️</div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">Structural Health Monitoring</h3>
+                      <p className="text-sm text-gray-300 mb-2">
+                        Upload accelerometer sensor data and our AI will analyze structural health in real-time.
+                      </p>
+                      <ul className="text-xs text-gray-400 space-y-1">
+                        <li>✓ Deep Learning CNN with 702K parameters</li>
+                        <li>✓ 4 structural conditions detected</li>
+                        <li>✓ PyTorch model (100% test accuracy)</li>
+                        <li>✓ Detects: healthy baseline, first floor damage, second floor damage, top floor bolt loosening</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <label className="block mb-2">
+                  <span className="text-white text-sm font-medium">Sensor Data (CSV)</span>
+                  <span className="text-gray-400 text-xs ml-2">Required: S1_X_g, S1_Y_g, S1_Z_g, S2_X_g, S2_Y_g, S2_Z_g</span>
+                </label>
+                <FileUploader 
+                  onFileSelect={(file) => handleFileSelect('damaged', file)}
+                  disabled={uploading}
+                  fileId={files.damaged}
+                  metadata={fileMetadata.damaged}
+                />
+              </div>
+            )}
                       <ul className="text-xs text-gray-400 space-y-1">
                         <li>✓ Trained on 230 real structural samples</li>
                         <li>✓ 5 different damage types detected</li>
@@ -597,7 +783,7 @@ export default function Upload() {
                             <span className="font-semibold">Method:</span> {mlPrediction.method}
                           </p>
                           <p className="text-gray-300">
-                            <span className="font-semibold">Features:</span> {mlPrediction.predicted_baseline_features.length} predicted
+                            <span className="font-semibold">Features:</span> {mlPrediction.predicted_baseline_features?.length || mlPrediction.predicted_baseline?.length || 0} predicted
                           </p>
                           {mlPrediction.warning && (
                             <p className="text-yellow-200 mt-2 text-xs italic">

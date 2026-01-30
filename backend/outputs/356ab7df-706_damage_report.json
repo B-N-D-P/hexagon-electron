@@ -1,0 +1,53 @@
+{
+  "analysis_id": "356ab7df-706",
+  "file_id": "4f766fdb",
+  "filename": "damaged_01.csv",
+  "classification": {
+    "prediction": "deformation",
+    "confidence": 38.7,
+    "probabilities": {
+      "bolt_damage": 19.933333333333334,
+      "brace_damage": 12.0,
+      "deformation": 38.7,
+      "healthy": 12.166666666666666,
+      "missing_beam": 17.2
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "deformation",
+        "probability": 38.7
+      },
+      {
+        "damage_type": "bolt_damage",
+        "probability": 19.933333333333334
+      },
+      {
+        "damage_type": "missing_beam",
+        "probability": 17.2
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Structural Deformation",
+      "description": "Bent or deformed structural beams detected. This indicates permanent deformation.",
+      "severity": "High",
+      "color": "red",
+      "icon": "\u26a0\ufe0f",
+      "recommendation": "Immediate inspection required. Consider beam replacement or reinforcement."
+    }
+  },
+  "file_info": {
+    "filename": "damaged_01.csv",
+    "file_path": "/home/itachi/structural-repair-web/backend/uploads/4f766fdb_damaged_01.csv",
+    "num_samples": 2006,
+    "num_sensors": 6,
+    "duration_sec": 20.06,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-22 09:33:59.853483"
+  },
+  "timestamp": "2026-01-22T09:34:01.144095"
+}

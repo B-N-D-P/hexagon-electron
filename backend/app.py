@@ -3,6 +3,13 @@ Main FastAPI Application for Structural Repair Quality Analysis
 2-Sensor XYZ Data System - Repair Quality Analysis Only
 """
 
+# CRITICAL: Add ML456 to path BEFORE any imports
+import sys
+from pathlib import Path as SysPath
+_ml456_path = '/home/itachi/ml456_advanced'
+if _ml456_path not in sys.path:
+    sys.path.insert(0, _ml456_path)
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, Query, Header
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +23,7 @@ from datetime import datetime
 from typing import Optional
 import json
 import uuid
+import pandas as pd
 import asyncio
 import threading
 import time
@@ -28,7 +36,7 @@ from config import (
     UPLOAD_DIR, OUTPUT_DIR, DEFAULT_FS, DEFAULT_MAX_MODES,
     SENSOR_POSITIONS, ML_MODELS_DIR
 )
-from models.schemas import (
+from backend_models.schemas import (
     UploadResponse, AnalysisRequest, AnalysisResult,
     ErrorResponse, HealthCheckResponse,
     DamageClassificationRequest, DamageClassificationResponse
@@ -37,55 +45,94 @@ from models.schemas import (
 # Import analysis services
 sys.path.insert(0, str(Path(__file__).parent / "services"))
 from baseline_manager import BaselineManager
-from serial_handler import SerialHandler
+# from serial_handler import SerialHandler  # Removed: Live monitoring disabled
 from damage_classifier import get_damage_classifier
 
 # ============================================================================
-# ML456 INTEGRATION - Baseline Prediction
+# INTEGRATED ML BASELINE PREDICTION
 # ============================================================================
 import requests
 import numpy as np
+from pathlib import Path as MLPath
 
-ML456_API_URL = "http://localhost:8002"  # ML456 Advanced API
+# Import ML models
+try:
+    from ml_models.feature_extractor import FeatureExtractor
+    from ml_models.model_manager import ModelManager
+    ML_MODELS_AVAILABLE = True
+    print("✓ ML models imported successfully")
+except Exception as e:
+    ML_MODELS_AVAILABLE = False
+    print(f"⚠️  ML models not available: {e}")
+
+# Initialize global ML manager
+_ml_manager = None
+
+def get_ml_manager():
+    """Get or initialize ML manager singleton."""
+    global _ml_manager
+    if _ml_manager is None and ML_MODELS_AVAILABLE:
+        try:
+            models_dir = Path(__file__).parent / "ml_models" / "trained"
+            _ml_manager = ModelManager(models_dir=models_dir)
+            print(f"✓ ML Manager initialized: {models_dir}")
+        except Exception as e:
+            print(f"⚠️  ML Manager initialization failed: {e}")
+            _ml_manager = None
+    return _ml_manager
 
 def predict_baseline_ml456(damaged_data: np.ndarray) -> dict:
     """
-    Predict baseline using ML456 Advanced when baseline is not available.
+    Predict baseline using external ML456 Advanced models.
     
     Args:
         damaged_data: Damaged sensor data (time_steps, channels)
         
     Returns:
-        dict with predicted_baseline_features, confidence, warning, etc.
+        dict with predicted_baseline, confidence, warning, etc.
     """
     try:
-        response = requests.post(
-            f"{ML456_API_URL}/predict",
-            json={
-                "damaged_data": damaged_data.tolist(),
-                "include_details": True
-            },
-            timeout=30
-        )
+        from ml_models.external_predictor import get_external_predictor
         
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
+        predictor = get_external_predictor()
+        
+        if not predictor.is_loaded:
+            return {
+                'success': False,
+                'error': 'ML456 Advanced models not available',
+                'confidence': 0.0,
+                'confidence_level': 'unavailable',
+                'method': 'none',
+                'warning': 'ML prediction service unavailable',
+                'recommendation': 'Upload baseline file or check ML456 Advanced installation at /home/itachi/ml456_advanced'
+            }
+        
+        # Use the external predictor
+        result = predictor.predict(damaged_data, return_details=True)
+        
+        return result
             
-    except requests.exceptions.ConnectionError:
-        print("⚠️  ML456 API not available at", ML456_API_URL)
-        return None
     except Exception as e:
-        print(f"⚠️  ML456 prediction error: {e}")
-        return None
+        print(f"⚠️  ML prediction error: {e}")
+        import traceback
+        traceback.print_exc()
+        return {
+            'success': False,
+            'error': str(e),
+            'confidence': 0.0,
+            'confidence_level': 'error',
+            'method': 'failed',
+            'warning': f'Prediction failed: {str(e)}',
+            'recommendation': 'Check ML model configuration and try again'
+        }
 
 def check_ml456_available() -> bool:
-    """Check if ML456 API is available."""
+    """Check if external ML456 Advanced models are available."""
     try:
-        response = requests.get(f"{ML456_API_URL}/health", timeout=5)
-        return response.status_code == 200
-    except:
+        from ml_models.external_predictor import check_external_predictor_available
+        return check_external_predictor_available()
+    except Exception as e:
+        print(f"⚠️  Error checking ML456 availability: {e}")
         return False
 # ============================================================================
 
@@ -108,7 +155,7 @@ DEFAULT_FS = 100.0  # IAI Hardware: 100 samples per second
 
 # Global state
 baseline_manager: Optional[BaselineManager] = None
-serial_handler: Optional[SerialHandler] = None
+# serial_handler: Optional[SerialHandler] = None  # Removed: Live monitoring disabled
 
 # ---------------------------------------------------------------------------
 # JSON sanitization utilities to prevent numpy/pydantic serialization issues
@@ -176,6 +223,58 @@ app.add_middleware(
 analysis_results = {}
 uploaded_files = {}
 
+# Metadata persistence file
+METADATA_FILE = UPLOAD_DIR / "uploaded_files_metadata.json"
+
+def save_uploaded_files_metadata():
+    """Save uploaded files metadata to disk for persistence across restarts."""
+    try:
+        # Convert datetime objects to strings for JSON serialization
+        metadata = {}
+        for file_id, info in uploaded_files.items():
+            metadata[file_id] = {
+                "filename": info["filename"],
+                "file_path": info["file_path"],
+                "num_samples": info["num_samples"],
+                "num_sensors": info["num_sensors"],
+                "duration_sec": info["duration_sec"],
+                "sampling_rate_hz": info["sampling_rate_hz"],
+                "upload_time": info["upload_time"].isoformat() if isinstance(info["upload_time"], datetime) else str(info["upload_time"])
+            }
+        
+        with open(METADATA_FILE, 'w') as f:
+            json.dump(metadata, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to save metadata: {e}")
+
+def load_uploaded_files_metadata():
+    """Load uploaded files metadata from disk on startup."""
+    global uploaded_files
+    
+    if not METADATA_FILE.exists():
+        print("No metadata file found, starting fresh")
+        return
+    
+    try:
+        with open(METADATA_FILE, 'r') as f:
+            metadata = json.load(f)
+        
+        # Validate that files still exist and convert timestamps back
+        for file_id, info in metadata.items():
+            file_path = Path(info["file_path"])
+            if file_path.exists():
+                info["upload_time"] = datetime.fromisoformat(info["upload_time"]) if "upload_time" in info else datetime.now()
+                uploaded_files[file_id] = info
+            else:
+                print(f"Warning: File {file_path} no longer exists, skipping")
+        
+        print(f"✓ Loaded {len(uploaded_files)} file metadata entries from disk")
+    except Exception as e:
+        print(f"Warning: Failed to load metadata: {e}")
+
+# Load metadata on startup
+load_uploaded_files_metadata()
+
 # Serve output artifacts (reports/plots)
 app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 
@@ -187,18 +286,12 @@ app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check():
     """Health check endpoint"""
-    global serial_handler
+    # global serial_handler  # Removed: Live monitoring disabled
 
     arduino_status = "disconnected"
     arduino_port = None
 
-    if serial_handler:
-        try:
-            status = serial_handler.get_status()
-            arduino_status = status.get('connection_status', 'disconnected')
-            arduino_port = status.get('port', None)
-        except:
-            arduino_status = "disconnected"
+    # Serial handler removed - live monitoring disabled
 
     # Check damage classifier availability
     damage_classifier_available = False
@@ -328,6 +421,9 @@ async def upload_file(file: UploadFile = File(...)):
             "sampling_rate_hz": fs,
             "upload_time": datetime.now(),
         }
+        
+        # Persist metadata to disk
+        save_uploaded_files_metadata()
 
         # Calculate actual number of sensors (6 columns = 2 sensors × 3 axes)
         # Support formats: 4-5 (single axis), 6 (2×3), 12 (4×3), 15 (5×3)
@@ -563,17 +659,19 @@ async def download_enhanced_html_report(analysis_id: str):
 def run_analysis(analysis_id: str, request: AnalysisRequest):
     """Run analysis in background"""
     try:
+        # Ensure backend directory is in path for imports
+        backend_dir = Path(__file__).parent
+        if str(backend_dir) not in sys.path:
+            sys.path.insert(0, str(backend_dir))
+        
         # Import analysis modules
-        # Add parent directory (home directory) to path to find python123
-        home_dir = Path.home()
-        sys.path.insert(0, str(home_dir))
-
-        from python123.repair_analyzer import (
+        # Use local repair_analyzer (already copied to backend/)
+        from repair_analyzer import (
             extract_modal_parameters,
-            calculate_repair_quality,
             create_visualizations,
             save_detailed_report,
         )
+        from improved_repair_quality import calculate_repair_quality_smart as calculate_repair_quality
         from services.data_adapters import load_timeseries_for_modal
         from services.damage_localizer import HybridDamageLocalizer
         from services.enhanced_graphs import generate_all_graph_data
@@ -629,7 +727,31 @@ def run_analysis(analysis_id: str, request: AnalysisRequest):
             analysis_results[analysis_id]["progress"] = 60
             analysis_results[analysis_id]["current_step"] = "Calculating repair quality..."
 
-            quality = calculate_repair_quality(modal_original, modal_damaged, modal_repaired)
+            quality = calculate_repair_quality(modal_original, modal_damaged, modal_repaired, repair_type=request.repair_type_override)
+
+            # Add validation warnings
+            warnings = []
+            
+            # Check if repaired exceeds original significantly (possible retrofitting)
+            if hasattr(quality.breakdown, 'repair_type'):
+                if quality.breakdown.repair_type == 'restoration' and len(modal_original.frequencies) > 0:
+                    import numpy as np
+                    fO = np.array(modal_original.frequencies)
+                    fR = np.array(modal_repaired.frequencies)
+                    exceed_pct = ((fR - fO) / fO) * 100
+                    max_exceed = np.max(exceed_pct)
+                    if max_exceed > 5:
+                        warnings.append(
+                            f"Repaired frequency exceeds original by {max_exceed:.1f}%. "
+                            "Consider using 'retrofitting' analysis mode for better assessment."
+                        )
+            
+            # Check number of modes
+            if len(modal_original.frequencies) < 3:
+                warnings.append(
+                    f"Only {len(modal_original.frequencies)} modes detected. "
+                    "Confidence: MEDIUM. Consider using additional sensors for higher accuracy."
+                )
 
             analysis_results[analysis_id]["progress"] = 75
             analysis_results[analysis_id]["current_step"] = "Generating visualizations..."
@@ -748,7 +870,11 @@ def run_analysis(analysis_id: str, request: AnalysisRequest):
                     "frequency_recovery": float(quality.breakdown.frequency_recovery),
                     "mode_shape_match": float(quality.breakdown.mode_shape_match),
                     "damping_recovery": float(quality.breakdown.damping_recovery),
+                    "repair_type": getattr(quality.breakdown, 'repair_type', 'restoration'),
+                    "strengthening_factor": float(getattr(quality.breakdown, 'strengthening_factor', 1.0)),
                 },
+                "repair_strategy": getattr(quality, 'repair_strategy', ''),
+                "warnings": warnings,
 
                 # Modal parameters for graphs
                 "modal_data": {
@@ -937,7 +1063,7 @@ async def select_baseline(baseline_id: str = Query(...)) -> dict:
 @app.on_event("startup")
 async def startup():
     """Initialize on startup"""
-    global baseline_manager, serial_handler
+    global baseline_manager  # , serial_handler  # Removed: Live monitoring disabled
 
     print("\n" + "="*80)
     print(f"🚀 {API_TITLE} v{API_VERSION}")
@@ -955,12 +1081,12 @@ async def startup():
     except Exception as e:
         print(f"⚠️  Baseline manager error: {e}")
 
-    # Initialize serial handler for Arduino (optional)
-    try:
-        serial_handler = SerialHandler(auto_connect=False)
-        print(f"✓ Serial handler initialized")
-    except Exception as e:
-        print(f"⚠️  Serial handler error: {e}")
+    # Initialize serial handler for Arduino (optional) - REMOVED: Live monitoring disabled
+    # try:
+    #     serial_handler = SerialHandler(auto_connect=False)
+    #     print(f"✓ Serial handler initialized")
+    # except Exception as e:
+    #     print(f"⚠️  Serial handler error: {e}")
 
     print("="*80 + "\n")
     print("📡 Live Monitoring System: DISABLED")
@@ -969,29 +1095,117 @@ async def startup():
 
 
 # ============================================================================
-# ML456 BASELINE PREDICTION ENDPOINT
+# ML BASELINE PREDICTION & TRAINING ENDPOINTS
 # ============================================================================
 
-@app.post("/api/v1/predict_baseline")
-async def predict_baseline_endpoint(file_id: str):
+@app.post("/api/v1/train-baseline")
+async def train_baseline_endpoint(file_id: str, baseline_name: str = "baseline"):
     """
-    Predict baseline for damaged structure using ML456 Advanced.
+    Train ML baseline model from healthy structure data.
     
-    Use this when baseline/original data is not available.
-    Returns predicted baseline features with confidence score.
+    Args:
+        file_id: ID of uploaded baseline/healthy structure data
+        baseline_name: Name for this baseline model
+    
+    Returns:
+        Training status and model information
     """
     try:
         # Import data loading function
         from services.data_adapters import load_timeseries_for_modal
         
-        # Check if ML456 is available
-        if not check_ml456_available():
+        # Check if ML models available
+        if not ML_MODELS_AVAILABLE:
             raise HTTPException(
                 status_code=503,
-                detail="ML456 baseline prediction service is not available. Start ML456 API first."
+                detail="ML models not available. Check ML dependencies."
             )
         
         # Check if file exists
+        if file_id not in uploaded_files:
+            raise HTTPException(
+                status_code=404,
+                detail=f"File not found: {file_id}"
+            )
+        
+        # Load baseline data
+        file_path = uploaded_files[file_id]["file_path"]
+        baseline_data = load_timeseries_for_modal(file_path)
+        
+        print(f"🎓 Training baseline model '{baseline_name}' from file {file_id}...")
+        
+        # Convert numpy array to dictionary format expected by FeatureExtractor
+        sensor_dict = {}
+        num_sensors = baseline_data.shape[1] if len(baseline_data.shape) > 1 else 1
+        
+        for sensor_id in range(num_sensors):
+            if len(baseline_data.shape) > 1:
+                sensor_dict[sensor_id] = baseline_data[:, sensor_id]
+            else:
+                sensor_dict[sensor_id] = baseline_data
+        
+        # Extract features
+        feature_extractor = FeatureExtractor(num_sensors=num_sensors)
+        baseline_features = feature_extractor.extract_features(sensor_dict)
+        
+        # Get or initialize ML manager
+        ml_manager = get_ml_manager()
+        if ml_manager is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to initialize ML manager"
+            )
+        
+        # Train model
+        model_version = ml_manager.train_model(
+            baseline_features,
+            baseline_name=baseline_name,
+            contamination=0.1
+        )
+        
+        if model_version is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Model training failed"
+            )
+        
+        return {
+            "success": True,
+            "model_version": model_version,
+            "baseline_name": baseline_name,
+            "file_id": file_id,
+            "num_samples": len(baseline_data),
+            "num_features": len(baseline_features),
+            "message": f"Baseline model '{baseline_name}' trained successfully",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Baseline training error: {str(e)}"
+        )
+
+
+@app.post("/api/v1/predict_baseline")
+async def predict_baseline_endpoint(file_id: str):
+    """
+    Predict baseline for damaged structure using trained ML models.
+    
+    Use this when baseline/original data is not available.
+    Returns predicted baseline features with confidence score.
+    
+    Note: You must train a baseline model first using /api/v1/train-baseline
+    """
+    try:
+        # Import data loading function
+        from services.data_adapters import load_timeseries_for_modal
+        
+        # Check if file exists first
         if file_id not in uploaded_files:
             raise HTTPException(
                 status_code=404,
@@ -1002,14 +1216,30 @@ async def predict_baseline_endpoint(file_id: str):
         file_path = uploaded_files[file_id]["file_path"]
         damaged_data = load_timeseries_for_modal(file_path)
         
-        # Predict baseline using ML456
+        # Predict baseline using ML456 (handles all error cases internally)
         print(f"🔮 Predicting baseline for file {file_id} using ML456...")
         ml_result = predict_baseline_ml456(damaged_data)
         
-        if ml_result is None:
-            raise HTTPException(
-                status_code=500,
-                detail="ML456 prediction failed"
+        # Check if prediction was successful
+        if not ml_result.get('success', False):
+            # Return user-friendly error with guidance
+            error_msg = ml_result.get('error', 'Unknown error')
+            warning = ml_result.get('warning', '')
+            recommendation = ml_result.get('recommendation', 'Please check ML model configuration')
+            
+            return JSONResponse(
+                status_code=200,  # Return 200 but with error info
+                content={
+                    "success": False,
+                    "error": error_msg,
+                    "warning": warning,
+                    "recommendation": recommendation,
+                    "confidence": ml_result.get('confidence', 0.0),
+                    "confidence_level": ml_result.get('confidence_level', 'unavailable'),
+                    "method": ml_result.get('method', 'none'),
+                    "file_id": file_id,
+                    "requires_training": True
+                }
             )
         
         # Store prediction for CSV download
@@ -1024,10 +1254,9 @@ async def predict_baseline_endpoint(file_id: str):
             "success": True,
             "file_id": file_id,
             "prediction_id": prediction_id,
-            "predicted_baseline_features": ml_result['predicted_baseline_features'],
-            "damaged_features": ml_result['damaged_features'],
-            "confidence": ml_result['confidence'],
-            "confidence_level": ml_result['confidence_level'],
+            "predicted_baseline": ml_result.get('predicted_baseline', []),
+            "confidence": ml_result.get('confidence', 0.0),
+            "confidence_level": ml_result.get('confidence_level', 'unknown'),
             "method": ml_result['method'],
             "warning": ml_result.get('warning'),
             "recommendation": ml_result.get('recommendation'),
@@ -1271,3 +1500,191 @@ if __name__ == "__main__":
         reload=True,
         log_level="info",
     )
+
+
+# ============================================================================
+# STRUCTURAL HEALTH MONITORING ENDPOINTS
+# ============================================================================
+
+# Lazy import to prevent startup crash if torch is not available
+def get_health_monitor():
+    """Get health monitor instance (lazy import)"""
+    try:
+        from services.health_monitor import get_health_monitor as _get_health_monitor
+        return _get_health_monitor()
+    except ImportError as e:
+        print(f"⚠️  Health monitor not available: {e}")
+        return None
+
+from pydantic import BaseModel
+
+class HealthMonitoringRequest(BaseModel):
+    """Request for structural health monitoring"""
+    file_id: str
+
+class HealthMonitoringResponse(BaseModel):
+    """Response from structural health monitoring"""
+    success: bool
+    file_id: str
+    filename: str
+    prediction: str
+    confidence: float
+    majority_percentage: float
+    probabilities: dict
+    top_3_predictions: list
+    num_windows: int
+    num_timesteps: int
+    is_healthy: bool
+    damage_info: dict
+    model_info: dict
+    timestamp: datetime
+    analysis_id: str
+
+@app.post("/api/v1/monitor-health", response_model=HealthMonitoringResponse)
+async def monitor_structural_health(request: HealthMonitoringRequest):
+    """
+    Monitor structural health from accelerometer sensor data.
+    
+    Uses trained CNN model (100% accuracy) to detect:
+    - Baseline (Healthy): Normal structure
+    - First Floor Damaged: Damage on first floor
+    - Second Floor Damaged: Damage on second floor
+    - Top Floor Bolt Loosened: Bolt loosening on top floor
+    
+    Requires CSV with columns: S1_X_g, S1_Y_g, S1_Z_g, S2_X_g, S2_Y_g, S2_Z_g
+    
+    Args:
+        request: Contains file_id of uploaded sensor data
+    
+    Returns:
+        Health monitoring results with prediction, confidence, and recommendations
+    """
+    try:
+        # Get health monitor
+        monitor = get_health_monitor()
+        
+        if monitor is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Health monitor not available. Check ML dependencies or train a model first."
+            )
+        
+        if not hasattr(monitor, 'is_loaded') or not monitor.is_loaded:
+            raise HTTPException(
+                status_code=503,
+                detail="Health monitoring model not available. Please contact administrator."
+            )
+        
+        # Get uploaded file info
+        file_info = uploaded_files.get(request.file_id)
+        if not file_info:
+            raise HTTPException(
+                status_code=404,
+                detail=f"File ID {request.file_id} not found. Please upload file first."
+            )
+        
+        file_path = file_info['file_path']
+        filename = file_info['filename']
+        
+        # Load CSV data (skip first row if it's units/duplicate header)
+        try:
+            df = pd.read_csv(file_path, skiprows=1)
+        except:
+            df = pd.read_csv(file_path)
+        
+        # Predict
+        result = monitor.predict(df)
+        
+        if not result['success']:
+            raise HTTPException(
+                status_code=400,
+                detail=result.get('error', 'Prediction failed')
+            )
+        
+        # Get damage description
+        damage_info = monitor.get_damage_description(result['prediction'])
+        
+        # Generate analysis ID
+        analysis_id = f"health_{uuid.uuid4().hex[:12]}"
+        
+        # Save results to JSON
+        output_file = OUTPUT_DIR / f"{analysis_id}_health_report.json"
+        report_data = {
+            'analysis_id': analysis_id,
+            'file_id': request.file_id,
+            'filename': filename,
+            'timestamp': datetime.now().isoformat(),
+            'prediction': result['prediction'],
+            'confidence': result['confidence'],
+            'majority_percentage': result['majority_percentage'],
+            'probabilities': result['probabilities'],
+            'top_3_predictions': result['top_3_predictions'],
+            'num_windows': result['num_windows'],
+            'num_timesteps': result['num_timesteps'],
+            'is_healthy': result['is_healthy'],
+            'damage_info': damage_info,
+            'model_info': result['model_info']
+        }
+        
+        with open(output_file, 'w') as f:
+            json.dump(report_data, f, indent=2)
+        
+        return HealthMonitoringResponse(
+            success=True,
+            file_id=request.file_id,
+            filename=filename,
+            prediction=result['prediction'],
+            confidence=result['confidence'],
+            majority_percentage=result['majority_percentage'],
+            probabilities=result['probabilities'],
+            top_3_predictions=result['top_3_predictions'],
+            num_windows=result['num_windows'],
+            num_timesteps=result['num_timesteps'],
+            is_healthy=result['is_healthy'],
+            damage_info=damage_info,
+            model_info=result['model_info'],
+            timestamp=datetime.now(),
+            analysis_id=analysis_id
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Health monitoring error: {str(e)}"
+        )
+
+@app.get("/api/v1/health-monitoring-status")
+async def get_health_monitoring_status():
+    """Get the status of the health monitoring model"""
+    try:
+        monitor = get_health_monitor()
+        
+        if not monitor.is_loaded:
+            return {
+                'available': False,
+                'message': 'Health monitoring model not loaded'
+            }
+        
+        return {
+            'available': True,
+            'model_info': monitor.model_info,
+            'device': str(monitor.device),
+            'classes': monitor.model_info['class_names']
+        }
+    except Exception as e:
+        return {
+            'available': False,
+            'error': str(e)
+        }
+
+
+@app.get("/health-monitoring", response_class=HTMLResponse)
+async def serve_health_monitoring_page():
+    """Serve the health monitoring HTML page"""
+    html_path = Path(__file__).parent / "health_monitoring.html"
+    with open(html_path, 'r') as f:
+        return f.read()

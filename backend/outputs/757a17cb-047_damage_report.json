@@ -1,0 +1,53 @@
+{
+  "analysis_id": "757a17cb-047",
+  "file_id": "6ef82136",
+  "filename": "data_20260119_152143.csv",
+  "classification": {
+    "prediction": "bolt_damage",
+    "confidence": 92.94047619047619,
+    "probabilities": {
+      "bolt_damage": 92.94047619047619,
+      "brace_damage": 0.0,
+      "deformation": 1.0,
+      "healthy": 0.6666666666666666,
+      "missing_beam": 5.392857142857142
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "bolt_damage",
+        "probability": 92.94047619047619
+      },
+      {
+        "damage_type": "missing_beam",
+        "probability": 5.392857142857142
+      },
+      {
+        "damage_type": "deformation",
+        "probability": 1.0
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Bolt Connection Damage",
+      "description": "Loose or missing bolts detected in structural connections.",
+      "severity": "Medium",
+      "color": "orange",
+      "icon": "\ud83d\udd29",
+      "recommendation": "Tighten or replace loose/missing bolts. Inspect all connections."
+    }
+  },
+  "file_info": {
+    "filename": "data_20260119_152143.csv",
+    "file_path": "/mnt/storage/structural-repair-web/backend/uploads/6ef82136_data_20260119_152143.csv",
+    "num_samples": 2499,
+    "num_sensors": 6,
+    "duration_sec": 24.99,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-26 15:40:28.112359"
+  },
+  "timestamp": "2026-01-26T15:40:30.539836"
+}

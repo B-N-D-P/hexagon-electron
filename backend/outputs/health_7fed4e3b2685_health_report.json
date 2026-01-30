@@ -1,0 +1,61 @@
+{
+  "analysis_id": "health_7fed4e3b2685",
+  "file_id": "2049fefe",
+  "filename": "data_20260126_172454.csv",
+  "timestamp": "2026-01-26T21:25:58.345856",
+  "prediction": "Second Floor Damaged",
+  "confidence": 99.9749755859375,
+  "majority_percentage": 100.0,
+  "probabilities": {
+    "Baseline (Healthy)": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "First Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Second Floor Damaged": {
+      "probability": 99.9749755859375,
+      "windows": 8,
+      "percentage": 100.0
+    },
+    "Top Floor Bolt Loosened": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    }
+  },
+  "top_3_predictions": [
+    {
+      "class": "Second Floor Damaged",
+      "probability": 99.9749755859375
+    },
+    {
+      "class": "Top Floor Bolt Loosened",
+      "probability": 0.012328501790761948
+    },
+    {
+      "class": "Baseline (Healthy)",
+      "probability": 0.006982163991779089
+    }
+  ],
+  "num_windows": 8,
+  "num_timesteps": 500,
+  "is_healthy": false,
+  "damage_info": {
+    "title": "Second Floor Structural Damage",
+    "description": "Damage detected on the second floor. Vibration analysis shows structural issues at mid-level.",
+    "severity": "High",
+    "color": "red",
+    "icon": "\ud83c\udfe2",
+    "recommendation": "Urgent structural assessment needed. Evaluate load-bearing capacity."
+  },
+  "model_info": {
+    "accuracy": "100.0%",
+    "framework": "PyTorch",
+    "parameters": 702788
+  }
+}

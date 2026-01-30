@@ -28,7 +28,7 @@ from config import (
     UPLOAD_DIR, OUTPUT_DIR, DEFAULT_FS, DEFAULT_MAX_MODES,
     SENSOR_POSITIONS, ML_MODELS_DIR
 )
-from models.schemas import (
+from backend_models.schemas import (
     UploadResponse, AnalysisRequest, AnalysisResult,
     ErrorResponse, HealthCheckResponse,
     DamageClassificationRequest, DamageClassificationResponse
@@ -37,7 +37,7 @@ from models.schemas import (
 # Import analysis services
 sys.path.insert(0, str(Path(__file__).parent / "services"))
 from baseline_manager import BaselineManager
-from serial_handler import SerialHandler
+# from serial_handler import SerialHandler  # Removed: Live monitoring disabled
 from damage_classifier import get_damage_classifier
 
 # ============================================================================
@@ -108,7 +108,7 @@ DEFAULT_FS = 100.0  # IAI Hardware: 100 samples per second
 
 # Global state
 baseline_manager: Optional[BaselineManager] = None
-serial_handler: Optional[SerialHandler] = None
+# serial_handler: Optional[SerialHandler] = None  # Removed: Live monitoring disabled
 
 # ---------------------------------------------------------------------------
 # JSON sanitization utilities to prevent numpy/pydantic serialization issues
@@ -187,18 +187,12 @@ app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check():
     """Health check endpoint"""
-    global serial_handler
+    # global serial_handler  # Removed: Live monitoring disabled
 
     arduino_status = "disconnected"
     arduino_port = None
 
-    if serial_handler:
-        try:
-            status = serial_handler.get_status()
-            arduino_status = status.get('connection_status', 'disconnected')
-            arduino_port = status.get('port', None)
-        except:
-            arduino_status = "disconnected"
+    # Serial handler removed - live monitoring disabled
 
     # Check damage classifier availability
     damage_classifier_available = False
@@ -937,7 +931,7 @@ async def select_baseline(baseline_id: str = Query(...)) -> dict:
 @app.on_event("startup")
 async def startup():
     """Initialize on startup"""
-    global baseline_manager, serial_handler
+    global baseline_manager  # , serial_handler  # Removed: Live monitoring disabled
 
     print("\n" + "="*80)
     print(f"🚀 {API_TITLE} v{API_VERSION}")
@@ -955,12 +949,12 @@ async def startup():
     except Exception as e:
         print(f"⚠️  Baseline manager error: {e}")
 
-    # Initialize serial handler for Arduino (optional)
-    try:
-        serial_handler = SerialHandler(auto_connect=False)
-        print(f"✓ Serial handler initialized")
-    except Exception as e:
-        print(f"⚠️  Serial handler error: {e}")
+    # Initialize serial handler for Arduino (optional) - REMOVED: Live monitoring disabled
+    # try:
+    #     serial_handler = SerialHandler(auto_connect=False)
+    #     print(f"✓ Serial handler initialized")
+    # except Exception as e:
+    #     print(f"⚠️  Serial handler error: {e}")
 
     print("="*80 + "\n")
     print("📡 Live Monitoring System: DISABLED")

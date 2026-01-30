@@ -1,0 +1,53 @@
+{
+  "analysis_id": "adf5a814-a08",
+  "file_id": "cffe3393",
+  "filename": "datatf_20260126_163803.csv",
+  "classification": {
+    "prediction": "healthy",
+    "confidence": 36.05833333333334,
+    "probabilities": {
+      "bolt_damage": 22.65,
+      "brace_damage": 17.3,
+      "deformation": 10.833333333333332,
+      "healthy": 36.05833333333334,
+      "missing_beam": 13.158333333333333
+    },
+    "top_3_predictions": [
+      {
+        "damage_type": "healthy",
+        "probability": 36.05833333333334
+      },
+      {
+        "damage_type": "bolt_damage",
+        "probability": 22.65
+      },
+      {
+        "damage_type": "brace_damage",
+        "probability": 17.3
+      }
+    ],
+    "model_info": {
+      "accuracy": 98.28,
+      "algorithm": "Random Forest",
+      "features_used": 69
+    },
+    "damage_info": {
+      "title": "Healthy Structure",
+      "description": "No structural damage detected. The structure is in good condition.",
+      "severity": "None",
+      "color": "green",
+      "icon": "\u2705",
+      "recommendation": "Continue regular maintenance and monitoring."
+    }
+  },
+  "file_info": {
+    "filename": "datatf_20260126_163803.csv",
+    "file_path": "/mnt/storage/structural-repair-web/backend/uploads/cffe3393_datatf_20260126_163803.csv",
+    "num_samples": 2499,
+    "num_sensors": 6,
+    "duration_sec": 24.99,
+    "sampling_rate_hz": 100.0,
+    "upload_time": "2026-01-29 19:53:10.471122"
+  },
+  "timestamp": "2026-01-29T19:54:37.393692"
+}

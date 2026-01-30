@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+env/
+ENV/
+ui_env/
+ui_env_new/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+.cache/
+.vite/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!README.md
+*.txt
+!requirements.txt
+!ui_requirements.txt
+
+# Temporary files
+tmp_*/
+*.tmp
+*.log
+
+# Large data folders (mount as volumes instead)
+backend/uploads/*
+backend/outputs/*
+datas/
+
+# Keep structure but ignore contents
+!backend/uploads/.gitkeep
+!backend/outputs/.gitkeep
+
+# Research papers and posters
+*.pdf
+*.typ
+poster_figures/
+
+# Docker files (meta)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts not needed in container
+scripts/
+tools/
+*.sh
+!run.sh
+!QUICK_START.sh

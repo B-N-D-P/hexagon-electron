@@ -14,6 +14,8 @@
 
 ### Core Functionality
 - ✅ **Repair Quality Analysis**: Compare original → damaged → repaired structures
+- 🆕 **Repair Type Detection**: Automatic detection of restoration vs retrofitting repairs
+- 🆕 **Type-Aware Scoring**: Appropriate quality metrics for each repair strategy
 - ✅ **Comparative Analysis**: 2-file mode (damaged vs repaired)
 - ✅ **Damage Localization**: AI-powered damage detection and location prediction
 - ✅ **Modal Parameter Extraction**: Frequencies, damping ratios, mode shapes

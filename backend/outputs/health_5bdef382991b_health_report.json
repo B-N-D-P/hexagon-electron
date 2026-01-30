@@ -1,0 +1,61 @@
+{
+  "analysis_id": "health_5bdef382991b",
+  "file_id": "d4319b59",
+  "filename": "data_20260119_144719.csv",
+  "timestamp": "2026-01-26T21:33:43.606513",
+  "prediction": "Top Floor Bolt Loosened",
+  "confidence": 100.0,
+  "majority_percentage": 100.0,
+  "probabilities": {
+    "Baseline (Healthy)": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "First Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Second Floor Damaged": {
+      "probability": 0.0,
+      "windows": 0,
+      "percentage": 0.0
+    },
+    "Top Floor Bolt Loosened": {
+      "probability": 100.0,
+      "windows": 8,
+      "percentage": 100.0
+    }
+  },
+  "top_3_predictions": [
+    {
+      "class": "Top Floor Bolt Loosened",
+      "probability": 100.0
+    },
+    {
+      "class": "Baseline (Healthy)",
+      "probability": 1.7714639436542686e-18
+    },
+    {
+      "class": "Second Floor Damaged",
+      "probability": 2.1109340377531654e-23
+    }
+  ],
+  "num_windows": 8,
+  "num_timesteps": 500,
+  "is_healthy": false,
+  "damage_info": {
+    "title": "Top Floor Bolt Loosening",
+    "description": "Bolts are loose or missing on the top floor. This affects structural connections and stability.",
+    "severity": "Medium",
+    "color": "orange",
+    "icon": "\ud83d\udd29",
+    "recommendation": "Inspect and retighten all bolts. Replace damaged or missing fasteners."
+  },
+  "model_info": {
+    "accuracy": "100.0%",
+    "framework": "PyTorch",
+    "parameters": 702788
+  }
+}

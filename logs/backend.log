@@ -1,0 +1,267 @@
+INFO:     Started server process [109216]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+✓ Configuration loaded successfully
+⚠ TensorFlow not available, Autoencoder will be disabled
+✓ ML models imported successfully
+
+================================================================================
+🚀 Structural Repair Quality Analysis API v1.0.0
+================================================================================
+✓ Upload directory: /mnt/storage/structural-repair-web/backend/uploads
+✓ Output directory: /mnt/storage/structural-repair-web/backend/outputs
+✓ CORS origins: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173']
+✓ API documentation: http://localhost:8000/docs
+Warning: Could not load baseline from health_eabca38069ba_health_report.json: Expecting value: line 47 column 17 (char 1078)
+✓ Baseline manager initialized
+✓ Available baselines: 0
+================================================================================
+
+📡 Live Monitoring System: DISABLED
+✓ API Ready for Analysis Upload & Report Generation
+================================================================================
+
+Model loaded from /home/itachi/ml456_advanced/checkpoints/advanced/random_forest_model.pkl
+✅ Realistic Baseline Predictor loaded!
+   Strategy: Hybrid
+   Weights: 30% ML + 70% Mean Baseline
+   Features: 216
+✓ ML456 Advanced predictor loaded successfully
+  Base Dir: /home/itachi/ml456_advanced
+  Model: random_forest_model.pkl
+  Feature Extractor: feature_extractor.pkl
+INFO:     127.0.0.1:45714 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45724 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45740 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51578 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "POST /api/v1/analyze HTTP/1.1" 200 OK
+[debug] damaged_data shape: (2499, 6) from /mnt/storage/structural-repair-web/backend/uploads/88b91c33_datafl_20260126_180656.csv
+[debug] original_data shape: (2499, 6) from /mnt/storage/structural-repair-web/backend/uploads/ddaba821_data_20260119_142144.csv
+[debug] repaired_data shape: (2489, 6) from /mnt/storage/structural-repair-web/backend/uploads/06e6a382_data_20260119_163435.csv
+INFO:     127.0.0.1:41512 - "OPTIONS /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/mnt/storage/structural-repair-web/backend/app.py", line 734, in run_analysis
+    enhanced_graphs,
+    ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'enhanced_graphs' where it is not associated with a value
+[DEBUG] Creating comprehensive PDF at: /mnt/storage/structural-repair-web/backend/outputs/4e1fc782-57e_comprehensive.pdf
+[DEBUG] Modal original frequencies: [2.44140625, 7.2509765625, 16.4306640625, 23.5595703125, 31.9091796875]
+[DEBUG] Quality data: {'overall': 0.819414900605411, 'frequency': 0.7572983440170941, 'mode_shape': 0.8025524286562133, 'damping': 1.0, 'interpretation': 'Good Restoration - Acceptable Recovery'}
+[ERROR] Could not generate comprehensive PDF: cannot access local variable 'enhanced_graphs' where it is not associated with a value
+Starting enhanced report generation for: /mnt/storage/structural-repair-web/backend/outputs/4e1fc782-57e_enhanced_report.html
+Generating hexagon chart...
+Generating frequency comparison chart...
+Generating quality breakdown chart...
+Generating recovery trajectory chart...
+Generating damping comparison chart...
+Generating energy distribution chart...
+Generating frequency shift chart...
+Generating mode summary chart...
+Converting charts to HTML...
+Writing HTML report to: /mnt/storage/structural-repair-web/backend/outputs/4e1fc782-57e_enhanced_report.html
+✓ Enhanced report generated: /mnt/storage/structural-repair-web/backend/outputs/4e1fc782-57e_enhanced_report.html (83230 bytes)
+Generating enhanced graphs...
+  • Power Spectral Density (FFT)...
+  • Damping Ratios...
+  • Mode Shapes (up to 3 modes)...
+  • Vibration Acceleration vs Time...
+  • Energy Distribution...
+  • MAC Matrix (Original vs Damaged)...
+  • MAC Matrix (Original vs Repaired)...
+  • Frequency Shifts...
+✓ All enhanced graphs generated!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                STRUCTURAL REPAIR QUALITY ANALYSIS SYSTEM v1.0                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Loading data files...
+[✓] original.csv   ✓
+[✓] damaged.csv    ✓
+[✓] repaired.csv   ✓
+
+Extracting modal parameters...
+[✓] FFT analysis complete
+[✓] 5 natural frequencies identified
+[✓] Mode shapes extracted
+[✓] Damping ratios estimated
+
+-------------------------------------------------------------------------------
+MODAL PARAMETER COMPARISON
+-------------------------------------------------------------------------------
+
+ORIGINAL STATE (Undamaged):
+  Natural Frequencies (Hz):  2.4  7.3  16.4  23.6  31.9
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+DAMAGED STATE:
+  Natural Frequencies (Hz):  3.5  9.2  14.8  20.4  25.7
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+  Frequency Change:         +45.0%  +26.6%  -9.7%  -13.5%  -19.6%
+
+REPAIRED STATE:
+  Natural Frequencies (Hz):  2.5  10.7  15.0  23.1  30.8
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+  Frequency Recovery:       +97.8%  -78.5%  +12.3%  +86.9%  +81.6%
+
+-------------------------------------------------------------------------------
+REPAIR QUALITY ASSESSMENT
+-------------------------------------------------------------------------------
+
+Individual Score Components:
+
+  Frequency Recovery:         0.757  ██████████████████████████████░░░░░░░░░░
+  Mode Shape Preservation:    0.803  ████████████████████████████████░░░░░░░░
+  Damping Recovery:           1.000  ████████████████████████████████████████
+
++----------------------------------------------------------------------+
+|                                                                       
+|                     OVERALL REPAIR QUALITY SCORE                     |
+|                                                                       
+|                                  0.819                               |
+|                                                                       
+|                Good Restoration - Acceptable Recovery                |
++----------------------------------------------------------------------+
+
+DETAILED INTERPRETATION
+
+✓ STRENGTHS:
+  • Acceptable stiffness recovery
+  • Overall response aligns with original
+
+AREAS OF NOTE:
+  • Some modes recover less; monitor these
+  • Evaluate damping if energy dissipation differs
+
+Analysis completed at: 2026-01-29 20:38:39
+
+INFO:     127.0.0.1:41512 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41512 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39210 - "GET /api/v1/results/4e1fc782-57e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46346 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46346 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47980 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47994 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "POST /api/v1/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "POST /api/v1/analyze HTTP/1.1" 200 OK
+[debug] damaged_data shape: (2499, 6) from /mnt/storage/structural-repair-web/backend/uploads/2c55a293_datafl_20260126_180656.csv
+[debug] original_data shape: (2499, 6) from /mnt/storage/structural-repair-web/backend/uploads/55f70187_data_20260119_142144.csv
+[debug] repaired_data shape: (2489, 6) from /mnt/storage/structural-repair-web/backend/uploads/a5b0d1f2_data_20260119_163435.csv
+INFO:     127.0.0.1:52876 - "OPTIONS /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "GET /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "GET /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/mnt/storage/structural-repair-web/backend/app.py", line 734, in run_analysis
+    enhanced_graphs,
+    ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'enhanced_graphs' where it is not associated with a value
+[DEBUG] Creating comprehensive PDF at: /mnt/storage/structural-repair-web/backend/outputs/84ec35bc-6d4_comprehensive.pdf
+[DEBUG] Modal original frequencies: [2.44140625, 7.2509765625, 16.4306640625, 23.5595703125, 31.9091796875]
+[DEBUG] Quality data: {'overall': 0.7194149006054109, 'frequency': 0.557298344017094, 'mode_shape': 0.8025524286562133, 'damping': 1.0, 'interpretation': 'Good Restoration - Acceptable Recovery'}
+[ERROR] Could not generate comprehensive PDF: cannot access local variable 'enhanced_graphs' where it is not associated with a value
+Starting enhanced report generation for: /mnt/storage/structural-repair-web/backend/outputs/84ec35bc-6d4_enhanced_report.html
+Generating hexagon chart...
+Generating frequency comparison chart...
+Generating quality breakdown chart...
+Generating recovery trajectory chart...
+Generating damping comparison chart...
+Generating energy distribution chart...
+Generating frequency shift chart...
+Generating mode summary chart...
+Converting charts to HTML...
+Writing HTML report to: /mnt/storage/structural-repair-web/backend/outputs/84ec35bc-6d4_enhanced_report.html
+✓ Enhanced report generated: /mnt/storage/structural-repair-web/backend/outputs/84ec35bc-6d4_enhanced_report.html (83227 bytes)
+Generating enhanced graphs...
+  • Power Spectral Density (FFT)...
+  • Damping Ratios...
+  • Mode Shapes (up to 3 modes)...
+  • Vibration Acceleration vs Time...
+  • Energy Distribution...
+  • MAC Matrix (Original vs Damaged)...
+  • MAC Matrix (Original vs Repaired)...
+  • Frequency Shifts...
+✓ All enhanced graphs generated!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                STRUCTURAL REPAIR QUALITY ANALYSIS SYSTEM v1.0                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Loading data files...
+[✓] original.csv   ✓
+[✓] damaged.csv    ✓
+[✓] repaired.csv   ✓
+
+Extracting modal parameters...
+[✓] FFT analysis complete
+[✓] 5 natural frequencies identified
+[✓] Mode shapes extracted
+[✓] Damping ratios estimated
+
+-------------------------------------------------------------------------------
+MODAL PARAMETER COMPARISON
+-------------------------------------------------------------------------------
+
+ORIGINAL STATE (Undamaged):
+  Natural Frequencies (Hz):  2.4  7.3  16.4  23.6  31.9
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+DAMAGED STATE:
+  Natural Frequencies (Hz):  3.5  9.2  14.8  20.4  25.7
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+  Frequency Change:         +45.0%  +26.6%  -9.7%  -13.5%  -19.6%
+
+REPAIRED STATE:
+  Natural Frequencies (Hz):  2.5  10.7  15.0  23.1  30.8
+  Damping Ratios:            0.020  0.020  0.020  0.020  0.020
+
+  Frequency Recovery:       +97.8%  -78.5%  +12.3%  +86.9%  +81.6%
+
+-------------------------------------------------------------------------------
+REPAIR QUALITY ASSESSMENT
+-------------------------------------------------------------------------------
+
+Individual Score Components:
+
+  Frequency Recovery:         0.557  ██████████████████████░░░░░░░░░░░░░░░░░░
+  Mode Shape Preservation:    0.803  ████████████████████████████████░░░░░░░░
+  Damping Recovery:           1.000  ████████████████████████████████████████
+
++----------------------------------------------------------------------+
+|                                                                       
+|                     OVERALL REPAIR QUALITY SCORE                     |
+|                                                                       
+|                                  0.719                               |
+|                                                                       
+|                Good Restoration - Acceptable Recovery                |
++----------------------------------------------------------------------+
+
+DETAILED INTERPRETATION
+
+✓ STRENGTHS:
+  • Acceptable stiffness recovery
+  • Overall response aligns with original
+
+AREAS OF NOTE:
+  • Some modes recover less; monitor these
+  • Evaluate damping if energy dissipation differs
+
+Analysis completed at: 2026-01-29 20:39:35
+
+INFO:     127.0.0.1:52876 - "GET /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "GET /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52886 - "GET /api/v1/results/84ec35bc-6d4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55068 - "OPTIONS /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55082 - "OPTIONS /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55068 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55082 - "GET /health HTTP/1.1" 200 OK
