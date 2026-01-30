@@ -1,0 +1,32 @@
+node_modules/
+dist/
+backend-dist/
+release/
+build/
+*.spec
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Backend temporary files
+backend/uploads/
+backend/outputs/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+
+# Backend temporary files
+backend/uploads/
+backend/outputs/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc

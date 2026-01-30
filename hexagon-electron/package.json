@@ -1,0 +1,79 @@
+{
+  "name": "hexagon",
+  "version": "1.0.0",
+  "description": "HEXAGON - AI-Powered Structural Analysis Desktop Application",
+  "main": "electron/main.js",
+  "author": "Structural Analysis Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"wait-on http://localhost:5173 http://localhost:5000 && electron .\"",
+    "dev:frontend": "cd ../frontend && npm run dev",
+    "dev:backend": "cd ../backend && python app.py",
+    "build": "npm run build:frontend && npm run build:backend && npm run build:electron",
+    "build:frontend": "cd ../frontend && cp .env.electron .env && npm run build && node ../hexagon-electron/frontend-adapter.js",
+    "build:backend": "python build_backend.py",
+    "build:electron": "electron-builder --linux AppImage",
+    "build:windows": "electron-builder --windows nsis",
+    "package": "npm run build"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "express": "^4.18.2",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.hexagon.structural-analysis",
+    "productName": "HEXAGON",
+    "artifactName": "HEXAGON-${version}-${os}-${arch}.${ext}",
+    "files": [
+      "electron/**/*",
+      "dist/**/*",
+      "backend-dist/**/*",
+      "resources/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend-dist",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../backend/ml_models",
+        "to": "ml_models",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Science",
+      "icon": "resources/icon.png",
+      "executableName": "hexagon"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resources/icon.ico",
+      "sign": null
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    }
+  }
+}
