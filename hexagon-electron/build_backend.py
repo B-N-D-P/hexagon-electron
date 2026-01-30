@@ -230,13 +230,16 @@ def copy_to_output():
     shutil.copytree(dist_dir, OUTPUT_DIR)
     print(f"  [OK] Copied to: {OUTPUT_DIR}")
     
-    # Verify executable
-    exe_path = OUTPUT_DIR / "backend"
+    # Verify executable (platform-specific)
+    import platform
+    exe_name = "backend.exe" if platform.system() == "Windows" else "backend"
+    exe_path = OUTPUT_DIR / exe_name
     if exe_path.exists():
-        os.chmod(exe_path, 0o755)
+        if platform.system() != "Windows":
+            os.chmod(exe_path, 0o755)
         print(f"  [OK] Backend executable ready: {exe_path}")
     else:
-        print(f"  [X] Executable not found!")
+        print(f"  [X] Executable not found: {exe_path}")
         sys.exit(1)
 
 def cleanup():
