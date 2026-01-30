@@ -183,8 +183,8 @@ export default function Upload() {
         );
         
         // Open health monitoring results
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        window.open(`${apiUrl}/health-monitoring`, '_blank');
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        window.open(`${backendUrl}/health-monitoring`, '_blank');
         
         return;
       } catch (error) {
@@ -213,27 +213,17 @@ export default function Upload() {
         // Log full result for debugging
         console.log('Damage Classification Result:', result);
         
-        // Download comprehensive reports automatically
+        // Open comprehensive report in browser
         if (result.reports) {
-          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
           
-          toast.info('📄 Downloading comprehensive reports...', { autoClose: 3000 });
+          toast.info('📄 Opening damage report...', { autoClose: 2000 });
           
-          // Download HTML report
+          // Open HTML report in browser
           setTimeout(() => {
-            window.open(`${apiUrl}${result.reports.html}`, '_blank');
+            window.open(`${backendUrl}${result.reports.html}`, '_blank');
+            toast.success('✅ Report opened in browser!', { autoClose: 3000 });
           }, 500);
-          
-          // Download PDF report
-          setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = `${apiUrl}${result.reports.pdf}`;
-            link.download = `damage_report_${result.analysis_id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            toast.success('✅ Reports downloaded successfully!', { autoClose: 3000 });
-          }, 1500);
         }
         
         return;

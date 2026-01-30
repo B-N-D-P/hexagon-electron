@@ -21,17 +21,81 @@ import pandas as pd
 
 
 def _count_columns(csv_path: str) -> int:
+    """Count columns, skipping duplicate headers."""
     df = pd.read_csv(csv_path, nrows=5)
     return df.shape[1]
+
+
+def _load_csv_robust(csv_path: str) -> pd.DataFrame:
+    """
+    Load CSV with robust header detection.
+    Handles:
+    - Duplicate header rows
+    - Missing headers
+    - Mixed data types in first row
+    """
+    with open(csv_path, 'r') as f:
+        lines = f.readlines()
+    
+    if len(lines) < 2:
+        raise ValueError(f"CSV file too short: {len(lines)} lines")
+    
+    # Check if first two rows are identical (duplicate header)
+    line1 = lines[0].strip()
+    line2 = lines[1].strip() if len(lines) > 1 else ""
+    
+    if line1 == line2:
+        # Duplicate header - skip first line
+        print(f"⚠️  Detected duplicate header in {csv_path}, skipping first line")
+        df = pd.read_csv(csv_path, skiprows=[0])
+    else:
+        # Try normal read
+        df = pd.read_csv(csv_path)
+    
+    # Check if header is actually data (no header case)
+    # If first row can be converted to all floats, there's no header
+    try:
+        first_row_numeric = pd.to_numeric(df.iloc[0], errors='coerce')
+        if not first_row_numeric.isna().any():
+            # First row is all numeric - header is missing or wrong
+            # Check if column names look like data
+            col_numeric = pd.to_numeric(df.columns, errors='coerce')
+            if not col_numeric.isna().any():
+                # Column names are numeric - no header!
+                print(f"⚠️  No header detected in {csv_path}, using default column names")
+                df = pd.read_csv(csv_path, header=None)
+                # Add default column names
+                df.columns = [f'S{i//3+1}_{"XYZ"[i%3]}_g' for i in range(len(df.columns))]
+    except Exception:
+        pass  # Keep original dataframe
+    
+    return df
 
 
 def load_timeseries_for_modal(csv_path: str) -> np.ndarray:
     """Load CSV and return (N,S) float array suitable for repair_analyzer.extract_modal_parameters.
 
+    FIXED: Handles duplicate headers, missing headers, and malformed CSVs
+    
+    - If 6 columns: 2-sensor 3-axis (XYZ), return as-is
     - If 15/16 columns: interpret as 5-sensor 3-axis, convert to magnitude => (N,5)
-    - Else: fall back to repair_analyzer.load_csv_data (single-axis general)
+    - Else: generic loader
     """
-    ncols = _count_columns(csv_path)
+    # Use robust loader
+    df = _load_csv_robust(csv_path)
+    ncols = df.shape[1]
+    
+    # 2 sensors x 3-axis = 6 columns (most common for this project)
+    if ncols == 6:
+        # Convert to numeric, drop NaNs
+        df = df.apply(pd.to_numeric, errors='coerce')
+        df = df.dropna()
+        
+        if df.empty:
+            raise ValueError(f"No valid numeric data in {csv_path}")
+        
+        # Return as-is for 2-sensor system
+        return df.to_numpy(dtype=float)
 
     # 5 sensors x 3-axis (optionally with time)
     if ncols in (15, 16):

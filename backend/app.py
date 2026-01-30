@@ -96,6 +96,9 @@ def predict_baseline_ml456(damaged_data: np.ndarray) -> dict:
         
         predictor = get_external_predictor()
         
+        # Ensure predictor is loaded (lazy loading)
+        predictor._ensure_loaded()
+        
         if not predictor.is_loaded:
             return {
                 'success': False,
@@ -338,6 +341,11 @@ async def root():
         }
     }
 
+
+@app.head("/")
+async def root_head():
+    """HEAD endpoint for health checks"""
+    return {}
 
 # ============================================================================
 # FILE UPLOAD ENDPOINTS
@@ -723,6 +731,14 @@ def run_analysis(analysis_id: str, request: AnalysisRequest):
 
             modal_original = extract_modal_parameters(original_data, fs=request.fs, max_modes=request.max_modes, min_freq=request.min_freq, max_freq=request.max_freq)
             modal_repaired = extract_modal_parameters(repaired_data, fs=request.fs, max_modes=request.max_modes, min_freq=request.min_freq, max_freq=request.max_freq)
+            
+            # Validate modal extraction succeeded
+            if len(modal_original.frequencies) == 0:
+                raise ValueError(f"No natural frequencies detected in original/baseline file. This may indicate:\n1. Signal quality issues\n2. Insufficient vibration amplitude\n3. Frequency range mismatch (try adjusting min_freq/max_freq)\nPlease check the data quality or upload a different file.")
+            if len(modal_damaged.frequencies) == 0:
+                raise ValueError(f"No natural frequencies detected in damaged file. Please check data quality.")
+            if len(modal_repaired.frequencies) == 0:
+                raise ValueError(f"No natural frequencies detected in repaired file. Please check data quality.")
 
             analysis_results[analysis_id]["progress"] = 60
             analysis_results[analysis_id]["current_step"] = "Calculating repair quality..."
@@ -1496,7 +1512,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
-        port=8000,
+        port=5000,
         reload=True,
         log_level="info",
     )
