@@ -59,10 +59,12 @@ jobs:
           cp -r ../frontend/dist ./dist
           node frontend-adapter.js
       
-      - name: Build Backend with PyInstaller
-        working-directory: hexagon-electron
-        timeout-minutes: 15
-        run: python build_backend.py
+      # NOTE: Windows backend build disabled due to timeout on free GitHub Actions
+      # Users should build locally - see WINDOWS_BUILD_GUIDE.md
+      # - name: Build Backend with PyInstaller
+      #   working-directory: hexagon-electron
+      #   timeout-minutes: 15
+      #   run: python build_backend.py
       
       - name: Build Electron App (Linux)
         if: matrix.os == 'ubuntu-latest'
